@@ -1,12 +1,16 @@
 use crate::ast::statement::ExpressionStatement;
 use std::fs;
+use crate::ast::statement::VariableDeclaration;
 
+
+/* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Node {
     Program(Program),
     File(File),
     ExpressionStatement(ExpressionStatement),
+    VariableDeclaration(VariableDeclaration),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -19,10 +23,13 @@ pub struct Program {
     pub body: Vec<Node>
 }
 
+
+// todo: Move this into a dedicated file module
 fn read_file(path: &str) -> String {
     let filename = path;
     fs::read_to_string(filename)
-        .expect("failed to read file").clone()
+        .expect(format!("Failed to read file with path : {}", path).as_str())
+        .clone()
 }
 
 pub fn deserialize_json(path: &str) -> Node {
