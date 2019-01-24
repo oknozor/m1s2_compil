@@ -1,7 +1,5 @@
-use crate::ast::statement::ExpressionStatement;
 use std::fs;
-use crate::ast::statement::VariableDeclaration;
-
+use crate::ast::statement::Statement;
 
 /* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
 #[derive(Serialize, Deserialize)]
@@ -9,8 +7,6 @@ use crate::ast::statement::VariableDeclaration;
 pub enum Node {
     Program(Program),
     File(File),
-    ExpressionStatement(ExpressionStatement),
-    VariableDeclaration(VariableDeclaration),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -20,7 +16,7 @@ pub struct File {
 
 #[derive(Serialize, Deserialize)]
 pub struct Program {
-    pub body: Vec<Node>
+    pub body: Vec<Statement>
 }
 
 
