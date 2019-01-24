@@ -9,10 +9,14 @@ pub enum Statement {
     WhileStatement(WhileStatement),
     VariableDeclaration(VariableDeclaration),
     VariableDeclarator(VariableDeclarator),
+    FunctionDeclaration(FunctionDeclaration),
     IfStatement(IfStatement),
+    SwitchStatement(SwitchStatement),
     ForStatement(ForStatement),
     BreakStatement(BreakStatement),
     ContinueStatement(ContinueStatement),
+    ReturnStatement(ReturnStatement),
+    EmptyStatement,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -23,6 +27,18 @@ pub struct BlockStatement {
 #[derive(Serialize, Deserialize)]
 pub struct ExpressionStatement {
     pub expression: Expression,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SwitchStatement {
+    pub discriminant: Expression,
+    pub cases: Vec<SwitchCase>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SwitchCase {
+    pub test: Option<Expression>,
+    pub consequent: Vec<Statement>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -52,8 +68,25 @@ pub struct BreakStatement {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ReturnStatement {
+    pub argument: Option<Expression>,
+}
+
+
+
+#[derive(Serialize, Deserialize)]
 pub struct ContinueStatement {
     pub label: Option<Identifier>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FunctionDeclaration {
+    pub id: Identifier,
+    // ES5 only, need to implement ES6 pattern
+    // https://github.com/estree/estree/blob/master/es5.md#patterns
+    pub params: Vec<Identifier>,
+    pub body: BlockStatement,
+
 }
 
 #[derive(Serialize, Deserialize)]
