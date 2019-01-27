@@ -10,10 +10,6 @@ use crate::ast::node::{File, Program, RootNode};
 use crate::runner::handler::Handler;
 use crate::ast::literal::Literal;
 
-/*pub struct Visitor<'ast, V, T: Handler> {
-    pub handler: &'ast  T,
-}*/
-
 pub trait Visitor: Handler
 {
     // module root
@@ -29,9 +25,10 @@ pub trait Visitor: Handler
     }
 
     fn visit_program_root(&mut self, e: &Program) {
+        Handler::handle_program_root(self);
         e.body.iter()
             .for_each(|statement| {
-                self.visit_statement(statement)
+                self.visit_statement(statement);
             });
     }
 
@@ -43,42 +40,18 @@ pub trait Visitor: Handler
     fn visit_statement(&mut self, s: &Statement) {
         Handler::handle_statement(self, s);
         match s {
-            Statement::BlockStatement(b) => {
-                self.visit_block_statement(b);
-            }
-            Statement::VariableDeclaration(v) => {
-                self.visit_variable_declaration(v);
-            }
-            Statement::ExpressionStatement(e) => {
-                self.visit_expression_statement(e);
-            }
-            Statement::VariableDeclarator(v) => {
-                self.visit_variable_declarator(v);
-            }
-            Statement::WhileStatement(v) => {
-                self.visit_while_statement(v);
-            }
-            Statement::IfStatement(i) => {
-                self.visit_if_statement(i);
-            }
-            Statement::SwitchStatement(s) => {
-                self.visit_switch_statement(s);
-            }
-            Statement::ForStatement(f) => {
-                self.visit_for_statement(f);
-            }
-            Statement::BreakStatement(b) => {
-                self.visit_break_statement(b);
-            }
-            Statement::ContinueStatement(c) => {
-                self.visit_continue_statement(c);
-            }
-            Statement::ReturnStatement(r) => {
-                self.visit_return_statement(r);
-            }
-            Statement::FunctionDeclaration(f) => {
-                self.visit_function_declaration(f);
-            }
+            Statement::BlockStatement(b) => self.visit_block_statement(b),
+            Statement::VariableDeclaration(v) => self.visit_variable_declaration(v),
+            Statement::VariableDeclarator(v) => self.visit_variable_declarator(v),
+            Statement::ExpressionStatement(e) => self.visit_expression_statement(e),
+            Statement::WhileStatement(v) => Handler::handle_while_statement(self, v),
+            Statement::IfStatement(i) => self.visit_if_statement(i),
+            Statement::SwitchStatement(s) => self.visit_switch_statement(s),
+            Statement::ForStatement(f) => self.visit_for_statement(f),
+            Statement::BreakStatement(b) => self.visit_break_statement(b),
+            Statement::ContinueStatement(c) => self.visit_continue_statement(c),
+            Statement::ReturnStatement(r) => self.visit_return_statement(r),
+            Statement::FunctionDeclaration(f) => self.visit_function_declaration(f),
             Statement::EmptyStatement => ()
         }
     }
@@ -88,11 +61,11 @@ pub trait Visitor: Handler
     }
 
     fn visit_while_statement(&mut self, w: &WhileStatement) {
-        self.visit_expression(&w.test);
-        self.visit_statement(&w.body);
+        Handler::handle_while_statement( self, &w);
     }
 
     fn visit_variable_declaration(&mut self, v: &VariableDeclaration) {
+        Handler::handle_variable_declaration(self, &v);
         v.declarations.iter()
             .for_each(|declaration| {
                 self.visit_variable_declarator(&declaration);
@@ -100,8 +73,7 @@ pub trait Visitor: Handler
     }
 
     fn visit_variable_declarator(&mut self, v: &VariableDeclarator) {
-        if v.init.is_some() {}
-        self.visit_option_expression(&v.init);
+        Handler::handle_variable_declarator(self, &v);
     }
 
     fn visit_if_statement(&mut self, i: &IfStatement) {
@@ -137,13 +109,13 @@ pub trait Visitor: Handler
 
     fn visit_break_statement(&mut self, f: &BreakStatement) {
         if let Some(s) = &f.label {
-            self.visit_identifier(s);
+            self.visit_identifier(&s.name);
         }
     }
 
     fn visit_continue_statement(&mut self, c: &ContinueStatement) {
         match &c.label {
-            Some(s) => self.visit_identifier(s),
+            Some(s) => self.visit_identifier(&s.name),
             None => ()
         }
     }
@@ -155,14 +127,11 @@ pub trait Visitor: Handler
 
     fn visit_function_declaration(&mut self, f: &FunctionDeclaration) {
         f.params.iter()
-            .for_each(|param| self.visit_identifier(param));
+            .for_each(|param| self.visit_identifier(&param.name));
         self.visit_block_statement(&f.body);
     }
 
-    // expression
     fn visit_expression(&mut self, s: &Expression) {
-        Handler::handle_expression(self, s);
-
         match s {
             Expression::NumericLiteral(ref n) => Handler::handle_numeric_literal(self, n),
             Expression::UpdateExpression(ref u) => self.visit_update_expression(u),
@@ -170,7 +139,7 @@ pub trait Visitor: Handler
             Expression::UnaryExpression(ref u) => self.visit_unary_expression(u),
             Expression::MemberExpression(ref m) => self.visit_member_expression(m),
             Expression::StringLiteral(ref s) => Handler::handle_string_literal(self, s),
-            Expression::Identifier(ref i) => self.visit_identifier(i),
+            Expression::Identifier(ref id) => self.visit_identifier(&id.name),
             Expression::CallExpression(ref c) => self.visit_call_expression(c),
             Expression::AssignmentExpression(ref e) => self.visit_assignement_expression(e),
             Expression::LogicalExpression(ref l) => self.visit_logical_expression(l),
@@ -178,12 +147,9 @@ pub trait Visitor: Handler
     }
 
     fn visit_option_expression(&mut self, e: &Option<Expression>) {
-        match &e {
-            Some(s) => {
-                self.visit_expression(&s)
-            }
-            None => ()
-        };
+        if let Some(s) = &e {
+            self.visit_expression(&s)
+        }
     }
 
     fn visit_expression_statement(&mut self, s: &ExpressionStatement) {
@@ -192,15 +158,16 @@ pub trait Visitor: Handler
     }
 
     fn visit_binary_expression(&mut self, e: &BinaryExpression) {
-        Handler::handle_start_extra(self, &e.extra);
+        if let Some(ex) = &e.extra {
+            Handler::handle_start_extra(self, ex.parenthesized);
+        }
 
         Handler::handle_binary_expression(self, e);
 
-        self.visit_expression(&e.left);
-        Handler::handle_num_operator(self, &e.operator);
-        self.visit_expression(&e.right);
-        Handler::handle_end_extra(self, &e.extra);
-
+        if let Some(ex) = &e.extra {
+            Handler::handle_end_extra(self, ex.parenthesized);
+        }
+        Handler::on_statement_end(self);
     }
 
     fn visit_unary_expression(&mut self, u: &UnaryExpression) {
@@ -248,8 +215,8 @@ pub trait Visitor: Handler
         */
     }
 
-    fn visit_identifier(&mut self, id: &Identifier) {
-        /*self.out.push_str(id.name.as_str())*/;
+    fn visit_identifier(&mut self, id: &String) {
+        self.handle_identifier(id);
     }
 
     fn visit_literal<L>(&mut self, lit: &Literal<L>) {}

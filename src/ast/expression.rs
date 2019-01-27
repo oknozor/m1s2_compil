@@ -1,6 +1,7 @@
 // serde cannot untag or flatten a nested enum for now
 // see : https://github.com/serde-rs/serde/issues/1402
 // could be useful for literals
+// Todo: add a 'ast lifetime to get rid of the heap
 
 use crate::ast::literal::Literal;
 
@@ -37,9 +38,8 @@ pub struct NumericLiteral {
 #[derive(Serialize, Deserialize)]
 pub struct UpdateExpression {
     pub operator: String,
+    // not sure boxing is the most memory efficient way to handle recursive struct
     pub argument: Box<Expression>,
-    // not sure boxing is the most efficient way to handle recursive struct
-    //todo
     prefix: bool,
 }
 

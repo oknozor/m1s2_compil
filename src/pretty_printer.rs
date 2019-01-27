@@ -8,7 +8,6 @@ use super::ast::expression::UpdateExpression;
 use crate::runner::visitor::Visitor;
 use crate::runner::handler::Handler;
 use crate::ast::literal::Literal;
-use crate::ast::expression::Extra;
 
 pub struct PrettyPrinter<'printer> {
     pub out: &'printer mut String,
@@ -17,6 +16,8 @@ pub struct PrettyPrinter<'printer> {
 impl<'pr> Visitor for PrettyPrinter<'pr> {}
 
 impl<'pr> Handler for PrettyPrinter<'pr> {
+    fn handle_program_root(&mut self) {}
+
     fn handle_expression(&mut self, s: &Expression) {
     }
 
@@ -24,35 +25,7 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
     }
 
     fn handle_binary_expression(&mut self, binary_exp: &BinaryExpression) {
-
-    }
-
-    fn handle_unary_expression(&mut self, u: &UnaryExpression) {
-        unimplemented!()
-    }
-
-    fn handle_assignement_expression(&mut self, e: &AssignmentExpression) {
-        unimplemented!()
-    }
-
-    fn handle_member_expression(&mut self, m: &MemberExpression) {
-        unimplemented!()
-    }
-
-    fn handle_logical_expression(&mut self, l: &LogicalExpression) {
-        unimplemented!()
-    }
-
-    fn handle_call_expression(&mut self, e: &CallExpression) {
-        unimplemented!()
-    }
-
-    fn handle_update_expression(&mut self, e: &UpdateExpression) {
-        unimplemented!()
-    }
-
-    fn handle_identifier(&mut self, id: &Identifier) {
-        unimplemented!()
+        self.out.push_str(&binary_exp.operator);
     }
 
     fn handle_num_operator(&mut self, operator: &str) {
@@ -60,77 +33,46 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
     }
 
     fn handle_string_literal(&mut self, literal: &Literal<String>) {
-        unimplemented!()
+        self.out.push_str(format!("\"{}\"", &literal.value).as_str());
     }
 
     fn handle_numeric_literal(&mut self, literal: &Literal<i64>) {
-        self.out.push_str(&literal.value.to_string())
+        self.out.push_str(&literal.value.to_string());
     }
 
-    fn handle_start_extra(&mut self, ex: &Option<Extra>) {
-        if let Some(ex) = ex {
+    fn handle_start_extra(&mut self, parenthesized: bool) {
+        if parenthesized {
             self.parentesis_left();
         }
     }
 
-    fn handle_end_extra(&mut self, ex: &Option<Extra>) {
-        if let Some(ex) = ex {
+    fn handle_end_extra(&mut self, parenthesized: bool) {
+        if parenthesized {
             self.parentesis_right();
         }
+    }
+
+    fn on_statement_end(&mut self) {
     }
 
     fn handle_statement(&mut self, s: &Statement) {
         self.new_line();
     }
 
-    fn handle_block_statement(&mut self, s: &BlockStatement) {
-        unimplemented!()
-    }
-
-    fn handle_while_statement(&mut self, w: &WhileStatement) {
-        unimplemented!()
-    }
-
     fn handle_variable_declaration(&mut self, v: &VariableDeclaration) {
-        unimplemented!()
+        self.out.push_str(&v.kind);
     }
 
     fn handle_variable_declarator(&mut self, v: &VariableDeclarator) {
-        unimplemented!()
-    }
-
-    fn handle_if_statement(&mut self, i: &IfStatement) {
-        unimplemented!()
-    }
-
-    fn handle_switch_statement(&mut self, s: &SwitchStatement) {
-        unimplemented!()
-    }
-
-    fn handle_for_statement(&mut self, f: &ForStatement) {
-        unimplemented!()
-    }
-
-    fn handle_break_statement(&mut self, f: &BreakStatement) {
-        unimplemented!()
-    }
-
-    fn handle_continue_statement(&mut self, c: &ContinueStatement) {
-        unimplemented!()
-    }
-
-    fn handle_return_statement(&mut self, r: &ReturnStatement) {
-        unimplemented!()
-    }
-
-    fn handle_function_declaration(&mut self, f: &FunctionDeclaration) {
-        unimplemented!()
+        self.backspace();
+        self.out.push_str(&v.id.name);
+        self.append_equal();
     }
 }
 
 impl<'printer> PrettyPrinter<'printer> {}
 
-// todo: refacto with enum
+// todo: refacto with tokens
 impl<'printer> PrettyPrinter<'printer> {
     pub fn print(&self) {
         println!("{}", self.out)

@@ -1,9 +1,6 @@
 use std::fs;
 use crate::ast::statement::Statement;
-
-pub struct Node<'ast, T> {
-    node: &'ast T
-}
+use crate::ast::statement::WhileStatement;
 
 /* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
 #[derive(Serialize, Deserialize)]
@@ -22,7 +19,6 @@ pub struct File {
 pub struct Program {
     pub body: Vec<Statement>
 }
-
 
 // todo: Move this into a dedicated file module
 fn read_file(path: &str) -> String {
