@@ -4,7 +4,7 @@ use crate::ast::statement::Statement;
 /* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum Node {
+pub enum RootNode {
     Program(Program),
     File(File),
 }
@@ -19,7 +19,6 @@ pub struct Program {
     pub body: Vec<Statement>
 }
 
-
 // todo: Move this into a dedicated file module
 fn read_file(path: &str) -> String {
     let filename = path;
@@ -28,9 +27,9 @@ fn read_file(path: &str) -> String {
         .clone()
 }
 
-pub fn deserialize_json(path: &str) -> Node {
+pub fn deserialize_json(path: &str) -> RootNode {
     let file = read_file(path);
-    let program: Node = serde_json::from_str(file.as_str())
+    let program: RootNode = serde_json::from_str(file.as_str())
         .expect("Unable to parse json file");
     program
 }

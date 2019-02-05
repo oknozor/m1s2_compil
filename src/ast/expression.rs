@@ -1,18 +1,23 @@
 // serde cannot untag or flatten a nested enum for now
 // see : https://github.com/serde-rs/serde/issues/1402
-// or try : https://play.rust-lang.org/?gist=ab0ff6d5fc1998ca1c16e9477918d849
+// could be useful for literals
+// Todo: add a 'ast lifetime to get rid of the heap
+
+use crate::ast::literal::JSLiteral;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
-    NumericLiteral(NumericLiteral),
-    StringLiteral(StringLiteral),
+    UnaryExpression(UnaryExpression),
+    NumericLiteral(JSLiteral<i64>),
+    StringLiteral(JSLiteral<String>),
     Identifier(Identifier),
     UpdateExpression(UpdateExpression),
     CallExpression(CallExpression),
     AssignmentExpression(AssignmentExpression),
-    EmptyStatement,
+    LogicalExpression(LogicalExpression),
+    MemberExpression(MemberExpression),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -33,8 +38,8 @@ pub struct NumericLiteral {
 #[derive(Serialize, Deserialize)]
 pub struct UpdateExpression {
     pub operator: String,
-    pub argument: Box<Expression>, // not sure boxing is the most efficient way to handle recursive struct
-    //todo
+    // not sure boxing is the most memory efficient way to handle recursive struct
+    pub argument: Box<Expression>,
     prefix: bool,
 }
 
@@ -47,9 +52,21 @@ pub struct CallExpression {
 #[derive(Serialize, Deserialize)]
 pub struct BinaryExpression {
     pub left: Box<Expression>,
-    // todo: Operator enum
     pub operator: String,
     pub right: Box<Expression>,
+    pub extra: Option<Extra>
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Extra {
+    pub parenthesized: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UnaryExpression {
+    pub operator: String,
+    pub prefix: bool,
+    pub argument: Box<Expression>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,21 +76,27 @@ pub struct AssignmentExpression {
     pub right: Box<Expression>,
 }
 
-// todo: could make a proc macro to generify this
-// see : https://doc.rust-lang.org/stable/book/ch19-06-macros.html
-pub trait Literal {
-    fn get_as_string(self) -> String;
+#[derive(Serialize, Deserialize)]
+pub struct LogicalExpression {
+    pub operator: String,
+    pub left: Box<Expression>,
+    pub right: Box<Expression>,
 }
 
-impl Literal for &StringLiteral {
-    // fixme: need a global 'ast lifetime to use ref instead of heap data
-    fn get_as_string(self) -> String {
-        format!("\"{}\"", self.value.clone())
-    }
+#[derive(Serialize, Deserialize)]
+pub struct MemberExpression {
+    pub object: Box<Expression>,
+    pub property: Box<Expression>,
+    pub computed: bool,
 }
 
-impl Literal for &NumericLiteral {
-    fn get_as_string(self) -> String {
-        self.value.to_string()
-    }
-}
+/*pub struct ObjectExpression {
+    pub properties: [ Property ],
+}*/
+
+//todo: generic literal
+/*pub struct Property {
+    pub key: Result< <T: Literal>, Identifier>,
+    pub value: Expression,
+    pub kind: String,
+}*/

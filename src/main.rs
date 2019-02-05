@@ -1,13 +1,21 @@
+#![feature(box_patterns)]
+#![feature(box_syntax)]
 extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 
-use crate::ast::node::Node;
-use crate::ast::visitor::Visitor;
+use std::collections::HashMap;
 use std::env;
 
+use crate::ast::node::RootNode;
+use crate::interpretter::Interpretter;
+use crate::interpretter::Stack;
+use crate::runner::visitor::Visitor;
+
 pub mod ast;
+pub mod runner;
+pub mod interpretter;
 pub mod pretty_printer;
 
 fn main() {
@@ -19,12 +27,21 @@ fn main() {
             panic!("Usage parse {file name}");
         };
 
-    let root_node: Node = ast::node::deserialize_json(json_estree);
+    let root_node: RootNode = ast::node::deserialize_json(json_estree);
     let mut pretty_printer = pretty_printer::PrettyPrinter {
         out: &mut String::new(),
     };
-    pretty_printer.visit_node(&root_node);
 
-    println!("{}", pretty_printer.out);
+    let interpretter = &mut Interpretter {
+        global_scope: HashMap::new(),
+        local_scope: HashMap::new(),
+        stack: Stack::new(),
+    };
+
+    interpretter.visit_node(&root_node);
+
+
+    pretty_printer.visit_node(&root_node);
+    pretty_printer.print();
 }
 
