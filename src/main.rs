@@ -1,15 +1,17 @@
+#![feature(box_patterns)]
+#![feature(box_syntax)]
 extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
+
+use std::collections::HashMap;
+use std::env;
 
 use crate::ast::node::RootNode;
-use std::env;
-use crate::runner::visitor::Visitor;
 use crate::interpretter::Interpretter;
-use crate::ast::literal::Number;
-use std::collections::HashMap;
 use crate::interpretter::Stack;
+use crate::runner::visitor::Visitor;
 
 pub mod ast;
 pub mod runner;
@@ -33,7 +35,7 @@ fn main() {
     let interpretter = &mut Interpretter {
         global_scope: HashMap::new(),
         local_scope: HashMap::new(),
-        stacks: HashMap::new(),
+        stack: Stack::new(),
     };
 
     interpretter.visit_node(&root_node);

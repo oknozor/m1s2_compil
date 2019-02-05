@@ -1,28 +1,28 @@
 {
   "type": "File",
   "start": 0,
-  "end": 127,
+  "end": 142,
   "loc": {
     "start": {
       "line": 1,
       "column": 0
     },
     "end": {
-      "line": 14,
+      "line": 16,
       "column": 0
     }
   },
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 127,
+    "end": 142,
     "loc": {
       "start": {
         "line": 1,
         "column": 0
       },
       "end": {
-        "line": 14,
+        "line": 16,
         "column": 0
       }
     },
@@ -975,6 +975,77 @@
               "raw": "0"
             },
             "value": 0
+          }
+        }
+      },
+      {
+        "type": "ExpressionStatement",
+        "start": 126,
+        "end": 139,
+        "loc": {
+          "start": {
+            "line": 13,
+            "column": 0
+          },
+          "end": {
+            "line": 13,
+            "column": 13
+          }
+        },
+        "expression": {
+          "type": "BinaryExpression",
+          "start": 126,
+          "end": 139,
+          "loc": {
+            "start": {
+              "line": 13,
+              "column": 0
+            },
+            "end": {
+              "line": 13,
+              "column": 13
+            }
+          },
+          "left": {
+            "type": "StringLiteral",
+            "start": 126,
+            "end": 131,
+            "loc": {
+              "start": {
+                "line": 13,
+                "column": 0
+              },
+              "end": {
+                "line": 13,
+                "column": 5
+              }
+            },
+            "extra": {
+              "rawValue": "123",
+              "raw": "\"123\""
+            },
+            "value": "123"
+          },
+          "operator": "*",
+          "right": {
+            "type": "StringLiteral",
+            "start": 134,
+            "end": 139,
+            "loc": {
+              "start": {
+                "line": 13,
+                "column": 8
+              },
+              "end": {
+                "line": 13,
+                "column": 13
+              }
+            },
+            "extra": {
+              "rawValue": "abc",
+              "raw": "\"abc\""
+            },
+            "value": "abc"
           }
         }
       }
@@ -2462,6 +2533,87 @@
     },
     {
       "type": {
+        "label": "string",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "123",
+      "start": 126,
+      "end": 131,
+      "loc": {
+        "start": {
+          "line": 13,
+          "column": 0
+        },
+        "end": {
+          "line": 13,
+          "column": 5
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "*",
+        "beforeExpr": true,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": 10,
+        "updateContext": null
+      },
+      "value": "*",
+      "start": 132,
+      "end": 133,
+      "loc": {
+        "start": {
+          "line": 13,
+          "column": 6
+        },
+        "end": {
+          "line": 13,
+          "column": 7
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "string",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "abc",
+      "start": 134,
+      "end": 139,
+      "loc": {
+        "start": {
+          "line": 13,
+          "column": 8
+        },
+        "end": {
+          "line": 13,
+          "column": 13
+        }
+      }
+    },
+    {
+      "type": {
         "label": "eof",
         "beforeExpr": false,
         "startsExpr": false,
@@ -2473,15 +2625,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 127,
-      "end": 127,
+      "start": 142,
+      "end": 142,
       "loc": {
         "start": {
-          "line": 14,
+          "line": 16,
           "column": 0
         },
         "end": {
-          "line": 14,
+          "line": 16,
           "column": 0
         }
       }

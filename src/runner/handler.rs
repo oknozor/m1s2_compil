@@ -4,17 +4,19 @@ use crate::ast::statement::{Statement, ExpressionStatement, BlockStatement, Whil
                             SwitchStatement};
 
 use crate::ast::expression::{Expression, BinaryExpression, AssignmentExpression, CallExpression,
-                             UpdateExpression, Identifier, LogicalExpression, UnaryExpression,
+                             UpdateExpression, LogicalExpression, UnaryExpression,
                              MemberExpression};
-use crate::ast::literal::Literal;
-use crate::ast::expression::Extra;
+use crate::ast::literal::JSLiteral;
 
+#[allow(unused)]
 pub trait Handler {
 
     fn handle_program_root(&mut self){}
 
     //expression
+    fn handle_expression_start(&mut self, s: &Expression){}
     fn handle_expression(&mut self, s: &Expression){}
+    fn handle_expression_end(&mut self){}
     fn handle_expression_statement(&mut self, s: &ExpressionStatement){}
     fn handle_binary_expression(&mut self, binary_exp: &BinaryExpression){}
     fn handle_unary_expression(&mut self, u: &UnaryExpression){}
@@ -25,14 +27,16 @@ pub trait Handler {
     fn handle_update_expression(&mut self, e: &UpdateExpression){}
     fn handle_identifier(&mut self, id: &String){}
     fn handle_num_operator(&mut self, operator: &str){}
-    fn handle_string_literal(&mut self, literal: &Literal<String>){}
-    fn handle_numeric_literal(&mut self, literal: &Literal<i64>){}
+    fn handle_string_literal(&mut self, literal: &JSLiteral<String>){}
+    fn handle_numeric_literal(&mut self, literal: &JSLiteral<i64>){}
     fn handle_start_extra(&mut self, par: bool){}
     fn handle_end_extra(&mut self, par: bool){}
     fn on_statement_end(&mut self){}
 
     //statement
     fn handle_statement(&mut self, s: &Statement){}
+    fn handle_statement_end(&mut self) {}
+
     fn handle_block_statement(&mut self, s: &BlockStatement){}
     fn handle_while_statement(&mut self, w: &WhileStatement){}
     fn handle_variable_declaration(&mut self, v: &VariableDeclaration){}

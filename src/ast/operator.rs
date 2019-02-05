@@ -1,4 +1,3 @@
-use crate::ast::literal::Number;
 use crate::ast::operator::BinaryOp::*;
 use std::fmt::Formatter;
 use std::fmt::Error;
@@ -84,8 +83,7 @@ impl BinaryOp {
 
 impl Display for BinaryOp {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(f, "{}", self.as_str());
-        Ok(())
+        write!(f, "{}", self.as_str())
     }
 }
 

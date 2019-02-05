@@ -1,32 +1,17 @@
-use crate::ast::expression::{Expression, BinaryExpression, AssignmentExpression, CallExpression, Identifier,
-                             LogicalExpression, UnaryExpression, MemberExpression};
-use crate::ast::statement::{Statement, ExpressionStatement, BlockStatement, WhileStatement,
-                            VariableDeclaration, VariableDeclarator, IfStatement, ForStatement, BreakStatement,
-                            ContinueStatement, FunctionDeclaration, ReturnStatement, SwitchStatement};
-use super::ast::expression::UpdateExpression;
+use crate::ast::expression::{Expression, AssignmentExpression, CallExpression};
+use crate::ast::statement::{WhileStatement, VariableDeclarator};
 use crate::runner::visitor::Visitor;
 use crate::runner::handler::Handler;
-use crate::ast::literal::Literal;
-use crate::ast::literal::Number;
-use crate::ast::expression::Extra;
-use std::fmt::Display;
-use std::fmt::Formatter;
+use crate::ast::literal::JSLiteral;
 use crate::ast::operator::BinaryOp;
-use std::option::Option;
 use crate::ast::token::Token;
+use crate::ast::literal::Literal;
 use std::collections::HashMap;
-use std::any::Any;
-use crate::runner::context::LexicalEnv;
-use crate::ast::operator::BinaryOp::RightParenthesis;
-use crate::ast::operator::BinaryOp::LeftParenthesis;
-use std::cell::RefCell;
-use crate::ast::token::Token::StandardFunction;
-use crate::runner::standard_lib::Function;
 
 pub struct Interpretter {
     pub global_scope: HashMap<String, Token>,
     pub local_scope: HashMap<String, Token>,
-    pub stacks: HashMap<String, Stack>,
+    pub stack: Stack,
 }
 
 pub struct Stack {
@@ -43,140 +28,140 @@ impl Stack {
     }
 }
 
-
 impl Visitor for Interpretter {}
 
 impl Handler for Interpretter {
-
     fn handle_program_root(&mut self) {
-        self.global_scope.insert(String::from("print"), Token::StandardFunction(Function::Print));
+        self.global_scope.insert(String::from("print"), Token::Undefined);
     }
+
     fn handle_variable_declarator(&mut self, var: &VariableDeclarator) {
         self.visit_option_expression(&var.init);
-        let value = self.stack.out_queue.pop().unwrap_or_else(|| Token::Undefined);
+        let value = self.pop_from_queue();
         self.local_scope.insert(var.id.name.clone(), value);
-        self.print_local_scope();
     }
 
-    fn handle_expression_statement(&mut self, s: &ExpressionStatement) {
-        self.stack.out_queue = vec![];
-        self.stack.operator_stack = vec![];
+    // Calculate the rest of the operation on the operator stack
+    // Push the result back to the queue
+    fn handle_expression_end(&mut self) {
+        while !self.stack.operator_stack.is_empty() {
+            let pop_op = self.pop_from_op_stack();
+            let a = self.pop_from_queue();
+            let b = self.pop_from_queue();
+            // Check if we are dealing with literal
+            if let (Token::Literal(l1), Token::Literal(l2)) = (a, b) {
+                let r = Token::calc(l1, l2, pop_op);
+                self.push_to_queue(r);
+            }
+        };
     }
 
-    fn handle_expression(&mut self, exp: &Expression) {
-
-    }
-
-    fn handle_binary_expression(&mut self, binary_exp: &BinaryExpression) {
-        self.print_local_scope();
-        self.visit_expression(&binary_exp.left);
-        let operator = BinaryOp::from_str(&binary_exp.operator);
-        self.stack.out_queue.push(Token::BinaryOp(operator));
-        self.visit_expression(&binary_exp.right);
-    }
-
-    fn handle_string_literal(&mut self, literal: &Literal<String>) {
-        let string_token = Token::StringLiteral(literal.value.clone());
-        self.stack.out_queue.push(string_token);
-    }
-
-    fn handle_numeric_literal(&mut self, literal: &Literal<i64>) {
-        self.stack.out_queue.push(Token::NumericLiteral(Number(literal.value)));
-    }
-
+    // Just pushing left parenthesis to the operator stack
     fn handle_start_extra(&mut self, parenthesized: bool) {
         if parenthesized {
-            self.stack.out_queue.push(Token::BinaryOp(LeftParenthesis));
+            self.stack.operator_stack.push(BinaryOp::LeftParenthesis);
         }
     }
 
+    // Search for a matching left parenthesis, calculate the expression in between
+    // and push it back to the token queue
     fn handle_end_extra(&mut self, parenthesized: bool) {
         if parenthesized {
-            self.stack.out_queue.push(Token::BinaryOp(RightParenthesis));
+            while self.stack.operator_stack.last().unwrap() != &BinaryOp::LeftParenthesis {
+                let pop_op = self.pop_from_op_stack();
+                let a = self.pop_from_queue();
+                let b = self.pop_from_queue();
+                if let (Token::Literal(l1), Token::Literal(l2)) = (a, b) {
+                    let r = Token::calc(l1, l2, pop_op);
+                    self.push_to_queue(r);
+                }
+            };
+            self.pop_from_op_stack(); // pop left parenthesis
         }
+    }
+
+    fn handle_assignement_expression(&mut self, e: &AssignmentExpression) {
+        let identifier = match &e.left {
+            box Expression::Identifier(id) => &id.name,
+            _ => panic!("Invalid left member in assignement!")
+        };
+        self.visit_expression(&e.left);
+        self.visit_expression(&e.right);
+        let value = &mut self.pop_from_queue();
+        if let Some(v) = self.local_scope.get_mut(identifier) {
+            *v = value.clone();
+        };
+    }
+
+    // Just push literals to the queue
+    fn handle_string_literal(&mut self, literal: &JSLiteral<String>) {
+        let literal = Literal::from(literal.value.clone());
+        let string_token = Token::Literal(literal);
+        self.push_to_queue(string_token);
+    }
+
+    fn handle_numeric_literal(&mut self, literal: &JSLiteral<i64>) {
+        let literal = Literal::from(literal.value);
+        self.push_to_queue(Token::Literal(literal));
+    }
+
+    #[allow(unused)]
+    fn handle_identifier(&mut self, identifier: &String) {
+        // First local scope
+        if let Some(loc_token) = self.local_scope.get(identifier) {
+            let value = self.local_scope.get(identifier).unwrap().clone();
+            let m_value = &mut value.clone();
+            self.push_to_queue(value);
+            self.local_scope.get_mut(identifier).replace(m_value);
+        };
+
+
+        // Then global
+        if let Some(glob_token) = self.global_scope.get(identifier) {
+            let value: Token = self.global_scope.get(identifier).unwrap().clone();
+            let m_value = &mut value.clone();
+            self.stack.out_queue.push(value);
+            self.local_scope.get_mut(identifier).replace(m_value);
+        }
+    }
+
+
+    fn handle_num_operator(&mut self, operator: &str) {
+        let operator = BinaryOp::from_str(operator);
+        // while operator on the stack as precedence over the one being evaluated
+        // and it's not a parenthesis, pop it and push it to queue
+        while !self.stack.operator_stack.is_empty()
+            && (BinaryOp::get_precedence(self.stack.operator_stack.last().unwrap(), &operator)
+            && self.stack.operator_stack.last().unwrap() != &BinaryOp::LeftParenthesis) {
+            let pop_op = self.stack.operator_stack.pop().unwrap();
+            self.push_to_queue(Token::BinaryOp(pop_op));
+        }
+        self.stack.operator_stack.push(operator);
     }
 
     fn handle_call_expression(&mut self, func: &CallExpression) {
         self.visit_expression(&func.callee);
     }
 
-    fn on_statement_end(&mut self) {
-        self.print_out_queue();
-    }
-
-    fn handle_identifier(&mut self, id: &String) {
-        self.print_local_scope();
-        if !self.local_scope.is_empty() {
-            let local_token = self.local_scope.get(id);
-            if let Some(Token) = local_token {
-                let local_token = local_token.unwrap();
-            } else {
-                let global_token = self.global_scope.get(id);
-            }
-        }
-    }
-
     fn handle_while_statement(&mut self, w: &WhileStatement) {
         self.visit_expression(&w.test);
-        let test: bool = self.get_expression_as_single_token(vec![Token::BooleanLiteral(true)]);
-        while (test) {
+        let mut test_token = self.pop_from_queue();
+        while test_token.as_literal().as_bool() {
             self.visit_statement(&w.body);
-            println!("currently visiting a while statement ! ")
-
+            self.visit_expression(&w.test);
+            test_token = self.pop_from_queue();
         }
     }
 }
 
 
+#[allow(unused)]
 impl Interpretter {
-    /*    fn solve_expression_literal {
-
-            //START
-            let operator = NumOp::from_str(&binary_exp.operator);
-            // while operator on the stack as precedence over the one being evaluated
-            // and it's not a parenthesis, pop it and push it to queue
-            while !self.operator_stack.is_empty()
-                && (NumOp::get_precedence(self.operator_stack.last().unwrap(), &operator)
-                && self.operator_stack.last().unwrap() != &NumOp::LeftParenthesis) {
-                let pop_op = self.operator_stack.pop().unwrap();
-                self.out_queue.push(Token::NumOp(pop_op));
-
-
-            // then push the current one on the operator stack
-            //PAR
-            // we get a right parenthesis, get the matching operator
-            // pop 2 number from the queue and calculate the operation
-            // and push the result on the output queue
-            while self.operator_stack.last().unwrap() != &NumOp::LeftParenthesis {
-                let pop_op = self.operator_stack.pop().unwrap();
-                let pop_op = Token::NumOp(pop_op);
-                let a = self.out_queue.pop().unwrap();
-                let b = self.out_queue.pop().unwrap();
-                println!("calculating {} {} {}", b.to_string(), pop_op.to_string(), b.to_string());
-                let r = Token::calc(a, b, pop_op);
-                self.out_queue.push(r);
-            }
-            self.operator_stack.pop(); // pop left parenthesis
-
-
-            //END
-            while !self.operator_stack.is_empty() {
-                let pop_op = self.operator_stack.pop().unwrap();
-                let a = self.out_queue.pop().unwrap();
-                let b = self.out_queue.pop().unwrap();
-                println!("calculating {} {} {}", b.to_string(), pop_op.to_string(), a.to_string());
-                let r = Token::calc(a, b, Token::NumOp(pop_op));
-                self.out_queue.push(r);
-            }
-            let temp = &self.out_queue.pop().unwrap().clone();
-            println!("Statement result: {}", temp.to_string());
-        }*/
-
-    fn push_to_queue(&mut self, token: Token) {
+    pub fn push_to_queue(&mut self, token: Token) {
         self.stack.out_queue.push(token);
     }
 
-    fn pop_from_queue(&mut self) -> Token {
+    pub fn pop_from_queue(&mut self) -> Token {
         let result = self.stack.out_queue.pop();
         if let Some(token) = result {
             token
@@ -185,22 +170,18 @@ impl Interpretter {
         }
     }
 
-    fn push_to_op_stack(&mut self, token: Token) {
+    pub fn push_to_op_stack(&mut self, token: Token) {
         let token_as_bin_op: BinaryOp = token.into();
         self.stack.operator_stack.push(token_as_bin_op);
     }
 
-    fn pop_from_op_stack(&mut self, token: Token) -> Token {
+    pub fn pop_from_op_stack(&mut self) -> Token {
         let result = self.stack.operator_stack.pop();
         if let Some(binop) = result {
             Token::BinaryOp(binop)
         } else {
             panic!("Expected a bin op, found None")
         }
-    }
-
-    fn get_expression_as_single_token(&mut self, expression: Vec<Token>) -> bool {
-        true
     }
 
     fn print_out_queue(&mut self) {
@@ -210,9 +191,22 @@ impl Interpretter {
         println!();
     }
 
+    fn print_op_stack(&mut self) {
+        print!("Op stack [ ");
+        self.stack.operator_stack.iter().for_each(|x| print!("{} ", x));
+        print!(" ]");
+        println!();
+    }
+
     fn print_local_scope(&mut self) {
         print!("\nCurrent scope holding: [");
         self.local_scope.iter().for_each(|reference| print!("{}:{}, ", reference.0, reference.1));
+        print!("]");
+        println!()
+    }
+    fn print_global_scope(&mut self) {
+        print!("\nGlobal scope holding: [");
+        self.global_scope.iter().for_each(|reference| print!("{}:{}, ", reference.0, reference.1));
         print!("]");
     }
 }

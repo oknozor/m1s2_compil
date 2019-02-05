@@ -1,13 +1,9 @@
+use crate::ast::expression::{BinaryExpression};
 use crate::ast::expression::Expression;
-use crate::ast::expression::{BinaryExpression, AssignmentExpression, CallExpression, Identifier,
-                             LogicalExpression, UnaryExpression, MemberExpression};
-use crate::ast::statement::{Statement, ExpressionStatement, BlockStatement, WhileStatement,
-                            VariableDeclaration, VariableDeclarator, IfStatement, ForStatement, BreakStatement,
-                            ContinueStatement, FunctionDeclaration, ReturnStatement, SwitchStatement};
-use super::ast::expression::UpdateExpression;
-use crate::runner::visitor::Visitor;
+use crate::ast::literal::JSLiteral;
+use crate::ast::statement::{ExpressionStatement, Statement, VariableDeclaration, VariableDeclarator};
 use crate::runner::handler::Handler;
-use crate::ast::literal::Literal;
+use crate::runner::visitor::Visitor;
 
 pub struct PrettyPrinter<'printer> {
     pub out: &'printer mut String,
@@ -15,6 +11,7 @@ pub struct PrettyPrinter<'printer> {
 
 impl<'pr> Visitor for PrettyPrinter<'pr> {}
 
+#[allow(unused)]
 impl<'pr> Handler for PrettyPrinter<'pr> {
     fn handle_program_root(&mut self) {}
 
@@ -32,11 +29,11 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
         self.out.push_str(operator)
     }
 
-    fn handle_string_literal(&mut self, literal: &Literal<String>) {
+    fn handle_string_literal(&mut self, literal: &JSLiteral<String>) {
         self.out.push_str(format!("\"{}\"", &literal.value).as_str());
     }
 
-    fn handle_numeric_literal(&mut self, literal: &Literal<i64>) {
+    fn handle_numeric_literal(&mut self, literal: &JSLiteral<i64>) {
         self.out.push_str(&literal.value.to_string());
     }
 
@@ -73,6 +70,7 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
 impl<'printer> PrettyPrinter<'printer> {}
 
 // todo: refacto with tokens
+#[allow(unused)]
 impl<'printer> PrettyPrinter<'printer> {
     pub fn print(&self) {
         println!("{}", self.out)

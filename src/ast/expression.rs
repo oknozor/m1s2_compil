@@ -3,15 +3,15 @@
 // could be useful for literals
 // Todo: add a 'ast lifetime to get rid of the heap
 
-use crate::ast::literal::Literal;
+use crate::ast::literal::JSLiteral;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
     UnaryExpression(UnaryExpression),
-    NumericLiteral(Literal<i64>),
-    StringLiteral(Literal<String>),
+    NumericLiteral(JSLiteral<i64>),
+    StringLiteral(JSLiteral<String>),
     Identifier(Identifier),
     UpdateExpression(UpdateExpression),
     CallExpression(CallExpression),

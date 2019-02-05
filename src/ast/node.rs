@@ -1,6 +1,5 @@
 use std::fs;
 use crate::ast::statement::Statement;
-use crate::ast::statement::WhileStatement;
 
 /* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
 #[derive(Serialize, Deserialize)]
