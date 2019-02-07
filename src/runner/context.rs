@@ -1,6 +1,14 @@
 use std::collections::HashMap;
 use std::any::Any;
 use self::LexicalEnvType::*;
+use crate::ast::expression::Loc;
+
+pub struct RunnerOption;
+impl RunnerOption {
+    pub fn with_loc(loc: &Loc) -> bool{
+        true
+    }
+}
 
 // https://www.ecma-international.org/ecma-262/#sec-executable-code-and-execution-contexts
 pub struct LexicalEnv<'scp> {

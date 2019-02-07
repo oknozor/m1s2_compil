@@ -4,6 +4,7 @@ use crate::ast::literal::JSLiteral;
 use crate::ast::statement::{ExpressionStatement, Statement, VariableDeclaration, VariableDeclarator};
 use crate::runner::handler::Handler;
 use crate::runner::visitor::Visitor;
+use std::fmt::Display;
 
 pub struct PrettyPrinter<'printer> {
     pub out: &'printer mut String,
@@ -25,7 +26,7 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
         self.out.push_str(&binary_exp.operator);
     }
 
-    fn handle_num_operator(&mut self, operator: &str) {
+    fn handle_binary_operator(&mut self, operator: &str) {
         self.out.push_str(operator)
     }
 
@@ -134,4 +135,17 @@ impl<'printer> PrettyPrinter<'printer> {
         self.out.push_str("=");
     }
 }
+
+trait OutlinePrint:  Display {
+    fn outline_print(&self) {
+        let output = self.to_string();
+        let len = output.len();
+        println!("{}", "*".repeat(len + 4));
+        println!("*{}*", " ".repeat(len + 2));
+        println!("* {} *", output);
+        println!("*{}*", " ".repeat(len + 2));
+        println!("{}", "*".repeat(len + 4));
+    }
+}
+
 

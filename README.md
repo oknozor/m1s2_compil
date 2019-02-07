@@ -14,7 +14,7 @@
 - with bin
 ```./target/debug/jsparser ${path_to_ast_json_file}```
 
-## TODO
+## Todo :
 
 - implement debbuging
 - implement the other control flow expression
@@ -24,3 +24,8 @@
 - add cli argument for pretty printer/interpret mode
 - add repl mode
 - add semantic documentation
+
+## To fix :
+
+- remote dirty copy with the Cell/RefCell type or a custom Box<> implementation
+- implement a custom deserializer for JSLiteral or flatten the Expression struct

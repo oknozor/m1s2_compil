@@ -1,87 +1,33 @@
-use crate::ast::operator::BinaryOp::*;
+
+
 use std::fmt::Formatter;
 use std::fmt::Error;
 use std::fmt::Display;
+use crate::ast::binary_operator::BinaryOp;
+use crate::ast::update_operator::UpdateOp;
+use crate::ast::assignement_operator::AssignOp;
 
-#[derive( Clone, PartialEq)]
-pub enum BinaryOp {
-    Add,
-    Sub,
-    Div,
-    Mul,
-    Mod,
-    LeftParenthesis,
-    RightParenthesis,
-    LessThan,
-    LessThanOrEq,
-    GreaterThan,
-    GreaterThanOrEq,
+
+pub trait Operator {
+    type OperatorKind;
+    fn from_str(str_op: &str) -> Self::OperatorKind;
+    fn as_str<'op>(&self) -> &'op str;
 }
 
-pub enum UnaryOp {
-    IncrementPost,
-    IncrementPre,
-    DecrementPost,
-    DecrementPre,
-    Minus,
-    Plus,
-    Not,
-}
-pub enum BitOp {
-    And,
-    Or,
-    Xor,
-    ShiftL,
-    ShiftR,
-}
 
-impl BinaryOp {
-    pub fn from_str(str_op: &str) -> Self {
-        match str_op {
-            "+" => Add,
-            "-" => Sub,
-            "*" => Mul,
-            "/" => Div,
-            "%" => Mod,
-            "(" => LeftParenthesis,
-            ")" => RightParenthesis,
-            "<" => LessThan,
-            "<=" => LessThanOrEq,
-            ">" => GreaterThan,
-            ">=" => GreaterThanOrEq,
-            _ => Add
-        }
-    }
-    pub fn as_str(&self) -> &str {
-        match self {
-            Add => "+",
-            Sub => "-",
-            Mul => "*",
-            Div => "/",
-            Mod => "%",
-            LeftParenthesis => "(",
-            RightParenthesis => ")",
-            LessThan => "<" ,
-            LessThanOrEq => "<=",
-            GreaterThan => ">" ,
-            GreaterThanOrEq => ">=",
-        }
-    }
 
-    pub fn get_precedence(a: &BinaryOp, b: &BinaryOp) -> bool {
-        match (a, b)  {
-            (Mul, Add) => true,
-            (Mul, Sub) => true,
-            (Div, Add) => true,
-            (Div, Sub) => true,
-            (Mod, Add) => true,
-            (Mod, Mod) => true,
-            _ => false,
-        }
+impl Display for UpdateOp {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "{}", self.as_str())
     }
 }
-
 impl Display for BinaryOp {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl Display for AssignOp {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "{}", self.as_str())
     }

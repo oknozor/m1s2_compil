@@ -20,13 +20,13 @@ pub trait Handler {
     fn handle_expression_statement(&mut self, s: &ExpressionStatement){}
     fn handle_binary_expression(&mut self, binary_exp: &BinaryExpression){}
     fn handle_unary_expression(&mut self, u: &UnaryExpression){}
-    fn handle_assignement_expression(&mut self, e: &AssignmentExpression){}
+    fn handle_assignment_expression(&mut self, e: &AssignmentExpression){}
     fn handle_member_expression(&mut self, m: &MemberExpression){}
     fn handle_logical_expression(&mut self, l: &LogicalExpression){}
     fn handle_call_expression(&mut self, e: &CallExpression){}
     fn handle_update_expression(&mut self, e: &UpdateExpression){}
     fn handle_identifier(&mut self, id: &String){}
-    fn handle_num_operator(&mut self, operator: &str){}
+    fn handle_binary_operator(&mut self, operator: &str){}
     fn handle_string_literal(&mut self, literal: &JSLiteral<String>){}
     fn handle_numeric_literal(&mut self, literal: &JSLiteral<i64>){}
     fn handle_start_extra(&mut self, par: bool){}

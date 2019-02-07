@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::env;
 
 use crate::ast::node::RootNode;
-use crate::interpretter::Interpretter;
+use crate::interpretter::Interpreter;
 use crate::interpretter::Stack;
 use crate::runner::visitor::Visitor;
 
@@ -32,7 +32,7 @@ fn main() {
         out: &mut String::new(),
     };
 
-    let interpretter = &mut Interpretter {
+    let interpretter = &mut Interpreter {
         global_scope: HashMap::new(),
         local_scope: HashMap::new(),
         stack: Stack::new(),
@@ -41,7 +41,7 @@ fn main() {
     interpretter.visit_node(&root_node);
 
 
-    pretty_printer.visit_node(&root_node);
-    pretty_printer.print();
+    /*pretty_printer.visit_node(&root_node);
+    pretty_printer.print();*/
 }
 

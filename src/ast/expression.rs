@@ -4,8 +4,9 @@
 // Todo: add a 'ast lifetime to get rid of the heap
 
 use crate::ast::literal::JSLiteral;
+use crate::runner::context::RunnerOption;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum Expression {
     BinaryExpression(BinaryExpression),
@@ -20,74 +21,102 @@ pub enum Expression {
     MemberExpression(MemberExpression),
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Identifier {
     pub name: String,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct StringLiteral {
     pub value: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct NumericLiteral {
     pub value: i64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UpdateExpression {
     pub operator: String,
-    // not sure boxing is the most memory efficient way to handle recursive struct
     pub argument: Box<Expression>,
     prefix: bool,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CallExpression {
     pub callee: Box<Expression>,
     pub arguments: Vec<Box<Expression>>,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct BinaryExpression {
     pub left: Box<Expression>,
     pub operator: String,
     pub right: Box<Expression>,
-    pub extra: Option<Extra>
+    pub extra: Option<Extra>,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Extra {
     pub parenthesized: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UnaryExpression {
     pub operator: String,
     pub prefix: bool,
     pub argument: Box<Expression>,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct AssignmentExpression {
     pub operator: String,
     pub left: Box<Expression>,
     pub right: Box<Expression>,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct LogicalExpression {
     pub operator: String,
     pub left: Box<Expression>,
     pub right: Box<Expression>,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
+
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MemberExpression {
     pub object: Box<Expression>,
     pub property: Box<Expression>,
     pub computed: bool,
+    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    pub loc: Loc,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Loc {
+    pub start: Pos,
+    pub end: Pos,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Pos {
+    pub line: i64,
+    pub column: i64,
 }
 
 /*pub struct ObjectExpression {
