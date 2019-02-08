@@ -1,5 +1,7 @@
-use crate::ast::update_operator::UpdateOp::*;
-use crate::ast::operator::Operator;
+use crate::token::operator::Operator;
+use crate::token::update_operator::UpdateOp::Increment;
+use crate::token::update_operator::UpdateOp::Decrement;
+
 #[derive( Clone, PartialEq)]
 pub enum UpdateOp {
     Increment,

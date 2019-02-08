@@ -1,12 +1,5 @@
-use crate::ast::statement::{Statement, ExpressionStatement, BlockStatement, WhileStatement,
-                            VariableDeclarator, VariableDeclaration, IfStatement, ForStatement,
-                            BreakStatement, ContinueStatement, FunctionDeclaration, ReturnStatement,
-                            SwitchStatement};
-
-use crate::ast::expression::{Expression, BinaryExpression, AssignmentExpression, CallExpression,
-                             UpdateExpression, LogicalExpression, UnaryExpression,
-                             MemberExpression};
-use crate::ast::literal::JSLiteral;
+use crate::ast::expression::*;
+use crate::ast::statement::*;
 
 #[allow(unused)]
 pub trait Handler {
@@ -36,7 +29,6 @@ pub trait Handler {
     //statement
     fn handle_statement(&mut self, s: &Statement){}
     fn handle_statement_end(&mut self) {}
-
     fn handle_block_statement(&mut self, s: &BlockStatement){}
     fn handle_while_statement(&mut self, w: &WhileStatement){}
     fn handle_variable_declaration(&mut self, v: &VariableDeclaration){}

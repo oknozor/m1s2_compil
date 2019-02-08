@@ -1,9 +1,7 @@
-use crate::ast::expression::{BinaryExpression};
-use crate::ast::expression::Expression;
-use crate::ast::literal::JSLiteral;
-use crate::ast::statement::{ExpressionStatement, Statement, VariableDeclaration, VariableDeclarator};
-use crate::runner::handler::Handler;
+use crate::ast::expression::*;
+use crate::ast::statement::*;
 use crate::runner::visitor::Visitor;
+use crate::runner::handler::Handler;
 use std::fmt::Display;
 
 pub struct PrettyPrinter<'printer> {

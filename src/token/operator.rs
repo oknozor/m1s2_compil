@@ -3,9 +3,9 @@
 use std::fmt::Formatter;
 use std::fmt::Error;
 use std::fmt::Display;
-use crate::ast::binary_operator::BinaryOp;
-use crate::ast::update_operator::UpdateOp;
-use crate::ast::assignement_operator::AssignOp;
+use crate::token::update_operator::UpdateOp;
+use crate::token::binary_operator::BinaryOp;
+use crate::token::assignement_operator::AssignOp;
 
 
 pub trait Operator {

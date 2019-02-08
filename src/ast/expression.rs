@@ -1,9 +1,7 @@
 // serde cannot untag or flatten a nested enum for now
 // see : https://github.com/serde-rs/serde/issues/1402
 // could be useful for literals
-// Todo: add a 'ast lifetime to get rid of the heap
 
-use crate::ast::literal::JSLiteral;
 use crate::runner::context::RunnerOption;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -117,6 +115,12 @@ pub struct Loc {
 pub struct Pos {
     pub line: i64,
     pub column: i64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(tag = "type")]
+pub struct JSLiteral<T> {
+    pub value: T
 }
 
 /*pub struct ObjectExpression {

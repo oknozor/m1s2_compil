@@ -3,17 +3,15 @@ use std::fmt::Error;
 use std::fmt::Formatter;
 
 use super::literal::Literal;
-use crate::ast::literal::Literal::NumericLiteral;
-use crate::ast::operator::Operator;
 use std::fmt::Debug;
-use crate::ast::update_operator::UpdateOp::Increment;
-use crate::ast::binary_operator::BinaryOp;
-use crate::ast::binary_operator::BinaryOp::*;
-use crate::ast::update_operator::UpdateOp;
-use crate::ast::update_operator::UpdateOp::*;
-use crate::ast::assignement_operator::AssignOp;
-use crate::ast::assignement_operator::AssignOp::*;
-use crate::ast::function::Function;
+use crate::token::binary_operator::BinaryOp;
+use crate::token::binary_operator::BinaryOp::*;
+use crate::token::update_operator::UpdateOp;
+use crate::token::update_operator::UpdateOp::*;
+use crate::token::assignement_operator::AssignOp;
+use crate::token::assignement_operator::AssignOp::*;
+use crate::token::literal::Literal::NumericLiteral;
+use crate::token::operator::Operator;
 
 #[derive (PartialEq, Clone)]
 pub enum Token {
@@ -21,7 +19,9 @@ pub enum Token {
     BinaryOp(BinaryOp),
     UpdateOp(UpdateOp),
     AssingOp(AssignOp),
-    FunctionDecration(Function),
+    Func(Vec<Token>),
+    Object(Vec<Token>),
+    Var(Vec<Token>),
     Undefined,
 }
 
@@ -89,7 +89,9 @@ impl Display for Token {
             Token::BinaryOp(o) => write!(f, "{}", o.as_str()),
             Token::AssingOp(o) => write!(f, "{}", o.as_str()),
             Token::Undefined => write!(f, "Undefined"),
-            Token::FunctionDecration(f) => unimplemented!(),
+            Token::Func(t) => unimplemented!(),
+            Token::Var(v) => unimplemented!(),
+            Token::Object(o) => unimplemented!(),
         }
     }
 }
@@ -102,7 +104,9 @@ impl Debug for Token {
             Token::BinaryOp(op) => write!(f, "{}", op),
             Token::AssingOp(op) => write!(f, "{}", op),
             Token::Undefined  => write!(f, "{}", "Undefined"),
-            Token::FunctionDecration(f) => unimplemented!(),
+            Token::Func(t) => unimplemented!(),
+            Token::Var(v) => unimplemented!(),
+            Token::Object(o) => unimplemented!()
         }
     }
 }

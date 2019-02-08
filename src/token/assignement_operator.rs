@@ -1,5 +1,5 @@
-use crate::ast::operator::Operator;
-use crate::ast::assignement_operator::AssignOp::*;
+use crate::token::operator::Operator;
+use crate::token::assignement_operator::AssignOp::*;
 
 #[derive(Clone, PartialEq)]
 pub enum AssignOp {

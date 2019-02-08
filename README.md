@@ -14,9 +14,16 @@
 - with bin
 ```./target/debug/jsparser ${path_to_ast_json_file}```
 
+## Literals :
+    - StringLiteral
+    - NumericLiteral
+    - BooleanLiteral)
+    - NullLiteral
+    - Infinity
+
 ## Todo :
 
-- implement debbuging
+- implement loc
 - implement the other control flow expression
 - implement interpretter for function and object
 - add unit test for operator overloading

@@ -1,5 +1,5 @@
-use crate::ast::binary_operator::BinaryOp::*;
-use crate::ast::operator::Operator;
+use crate::token::operator::Operator;
+use crate::token::binary_operator::BinaryOp::*;
 
 #[derive(Clone, PartialEq)]
 pub enum BinaryOp {

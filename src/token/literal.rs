@@ -5,16 +5,10 @@ use std::ops::Mul;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Error;
-use crate::ast::literal::Literal::*;
 use std::fmt::Debug;
 use std::cmp::Ordering;
 use std::ops::Rem;
-
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(tag = "type")]
-pub struct JSLiteral<T> {
-    pub value: T
-}
+use crate::token::literal::Literal::*;
 
 pub struct Number(pub i64);
 

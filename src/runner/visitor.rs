@@ -40,6 +40,7 @@ pub trait Visitor: Handler
 
     // statement
     fn visit_statement(&mut self, s: &Statement) {
+        Handler::handle_statement(self, s);
         match s {
             Statement::BlockStatement(b) => self.visit_block_statement(b),
             Statement::VariableDeclaration(v) => self.visit_variable_declaration(v),
