@@ -6,36 +6,13 @@ use crate::ast::statement::{Statement, ExpressionStatement, BlockStatement, Whil
 use crate::ast::expression::{Expression, CallExpression,
                              LogicalExpression, UnaryExpression,
                              MemberExpression};
-use crate::ast::node::{File, Program, RootNode};
+use crate::ast::node::{File, Program};
 use crate::runner::handler::Handler;
 
 pub trait Visitor: Handler
 {
     fn with_loc() -> bool {
         true
-    }
-    // module root
-    fn visit_node(&mut self, s: &RootNode) {
-        match s {
-            RootNode::Program(ref p) => {
-                self.visit_program_root(p);
-            }
-            RootNode::File(ref f) => {
-                self.visit_file(f);
-            }
-        }
-    }
-
-    fn visit_program_root(&mut self, e: &Program) {
-        Handler::handle_program_root(self);
-        e.body.iter()
-            .for_each(|statement| {
-                self.visit_statement(statement);
-            });
-    }
-
-    fn visit_file(&mut self, e: &File) {
-        self.visit_program_root(&e.program);
     }
 
     // statement
@@ -54,7 +31,7 @@ pub trait Visitor: Handler
             Statement::ContinueStatement(c) => self.visit_continue_statement(c),
             Statement::ReturnStatement(r) => self.visit_return_statement(r),
             Statement::FunctionDeclaration(f) => self.visit_function_declaration(f),
-            Statement::EmptyStatement => ()
+            _ => ()
         }
     }
 
@@ -128,6 +105,7 @@ pub trait Visitor: Handler
 
 
     fn visit_function_declaration(&mut self, f: &FunctionDeclaration) {
+        Handler::handle_function_declaration(self, f);
         f.params.iter()
             .for_each(|param| Handler::handle_identifier(self, &param.name));
         self.visit_block_statement(&f.body);

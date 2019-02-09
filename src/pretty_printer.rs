@@ -12,7 +12,6 @@ impl<'pr> Visitor for PrettyPrinter<'pr> {}
 
 #[allow(unused)]
 impl<'pr> Handler for PrettyPrinter<'pr> {
-    fn handle_program_root(&mut self) {}
 
     fn handle_expression(&mut self, s: &Expression) {
     }
@@ -27,7 +26,6 @@ impl<'pr> Handler for PrettyPrinter<'pr> {
     fn handle_binary_operator(&mut self, operator: &str) {
         self.out.push_str(operator)
     }
-
     fn handle_string_literal(&mut self, literal: &JSLiteral<String>) {
         self.out.push_str(format!("\"{}\"", &literal.value).as_str());
     }

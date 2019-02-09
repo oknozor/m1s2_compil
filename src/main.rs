@@ -6,18 +6,18 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use std::collections::HashMap;
 use std::env;
 
 use crate::ast::node::RootNode;
+use crate::ast::statement::Statement;
+use crate::runner::scope::Scope;
+use crate::interpretter::Interpreter;
 use crate::runner::visitor::Visitor;
 
 pub mod ast;
 pub mod token;
 pub mod runner;
-pub mod scope_builder;
 pub mod interpretter;
-pub mod pretty_printer;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -29,13 +29,37 @@ fn main() {
         };
 
     let root_node: RootNode = ast::node::deserialize_json(json_estree);
-    let mut pretty_printer = pretty_printer::PrettyPrinter {
-        out: &mut String::new(),
+    let program_root = root_node.get_program_root();
+    let program_root = program_root.expect("Error parsing Json AST");
+
+    let mut interpretter = Interpreter {
+        scope: Scope::new(Statement::Root(program_root)),
     };
 
-
-
-    /*pretty_printer.visit_node(&root_node);
-    pretty_printer.print();*/
+    interpretter.visit_root();
 }
+
+
+
+
+#[test]
+fn root_node_shall_have_some_childs() {
+    let json_estree = "/home/okno/LILLE1/S2/COMPIL/pretty_printer/exemples/01-expressions.js";
+    let root_node: RootNode = ast::node::deserialize_json(json_estree);
+    let program_root = root_node.get_program_root();
+    let program_root = program_root.expect("Error parsing Json AST");
+
+    let interpretter = Interpreter {
+        scope: Scope::new(Statement::Root(program_root)),
+    };
+
+    let child_size = interpretter.scope.children.borrow_mut().len();
+
+    assert_eq!(12, child_size);
+
+
+}
+
+
+
 

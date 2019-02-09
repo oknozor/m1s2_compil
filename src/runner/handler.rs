@@ -4,7 +4,7 @@ use crate::ast::statement::*;
 #[allow(unused)]
 pub trait Handler {
 
-    fn handle_program_root(&mut self){}
+    fn handle_program_root(&mut self, root: &Vec<Statement>){}
 
     //expression
     fn handle_expression_start(&mut self, s: &Expression){}

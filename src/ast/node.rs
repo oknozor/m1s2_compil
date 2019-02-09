@@ -19,6 +19,16 @@ pub struct Program {
     pub body: Vec<Statement>
 }
 
+impl RootNode {
+    pub fn get_program_root(&self) -> Option<Vec<Statement>> {
+        match self {
+            RootNode::Program(p) => Some(p.body.to_owned()),
+            RootNode::File(ref f) => Some(f.program.body.to_owned()),
+            _ => None
+        }
+    }
+}
+
 // todo: Move this into a dedicated file module
 fn read_file(path: &str) -> String {
     let filename = path;
