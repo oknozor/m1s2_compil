@@ -1,9 +1,36 @@
 var x = 10;
+var y = 10;
+var z = 10;
 
 function blob(n) {
+    function bar(n) {
+        return n + 1;
+
+        function fizz(n) {
+            return n + 1;
+        }
+
+        function buzz(n) {
+            function bloof(n) {
+                return n + 1;
+            }
+
+            return n + 1;
+        }
+
+        function bazz(n) {
+            return n + 1;
+        }
+    }
+    function fofo() {
+        print("woof");
+    }
+
+    buzz(n);
     x = x + n;
     return x;
-} ;
+};
 
-print(blob(1));
-print(blob(2));
+pif(blob(1));
+paf(blob(2));
+pouf(blob(2));

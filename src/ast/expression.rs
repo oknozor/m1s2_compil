@@ -2,6 +2,7 @@
 // see : https://github.com/serde-rs/serde/issues/1402
 // could be useful for literals
 
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum Expression {

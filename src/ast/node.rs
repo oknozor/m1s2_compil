@@ -16,13 +16,13 @@ pub struct File {
 
 #[derive(Serialize, Deserialize)]
 pub struct Program {
-    pub body: Vec<Statement>
+    pub body: Vec<Box<Statement>>
 }
 
 impl RootNode {
-    pub fn get_program_root(&self) -> Option<Vec<Statement>> {
+    pub fn get_program_root(&self) -> Option<Vec<Box<Statement>>> {
         match self {
-            RootNode::Program(p) => Some(p.body.to_owned()),
+            RootNode::Program(p) => Some( p.body.to_owned()),
             RootNode::File(ref f) => Some(f.program.body.to_owned()),
             _ => None
         }

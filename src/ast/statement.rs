@@ -4,9 +4,11 @@ use crate::ast::expression::Loc;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Error;
-use crate::runner::scope::Scoped;
 use crate::ast::expression::Pos;
 
+pub trait Named {
+    fn get_name(&self) -> String;
+}
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum Statement {
@@ -92,12 +94,11 @@ pub struct FunctionDeclaration {
     // https://github.com/estree/estree/blob/master/es5.md#patterns
     pub params: Vec<Identifier>,
     pub body: BlockStatement,
-
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VariableDeclaration {
-    pub declarations: Vec<VariableDeclarator>,
+    pub declarations: Vec<Box<Statement>>,
     pub kind: String,
     #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
@@ -121,10 +122,11 @@ impl Display for Loc {
     }
 }
 
-impl Scoped for Statement {
-    fn get_name(&self) -> Option<String> {
+impl Statement {
+    pub fn get_name(&self) -> Option<String> {
         match self {
             Statement::FunctionDeclaration(ref func) => Some(func.id.name.clone()),
+            Statement::VariableDeclarator(ref v) => Some(v.id.name.clone()),
             _ => None
         }
     }
