@@ -16,31 +16,11 @@ pub enum BinaryOp {
     GreaterThanOrEq,
     PartialEq,
     StrictEq,
-    None
+    None,
 }
 
-impl Operator for BinaryOp {
-    type OperatorKind = BinaryOp;
-
-    fn from_str(str_op: &str) -> Self {
-        match str_op {
-            "+" => Add,
-            "-" => Sub,
-            "*" => Mul,
-            "/" => Div,
-            "%" => Mod,
-            "(" => LeftParenthesis,
-            ")" => RightParenthesis,
-            "<" => LessThan,
-            "<=" => LessThanOrEq,
-            ">" => GreaterThan,
-            ">=" => GreaterThanOrEq,
-            "!=" => PartialEq,
-            "==" => StrictEq,
-            _ => None
-        }
-    }
-    fn as_str<'op>(&self) -> &'op str {
+impl BinaryOp {
+    pub fn as_str<'op>(&self) -> &'op str {
         match self {
             Add => "+",
             Sub => "-",
@@ -59,6 +39,29 @@ impl Operator for BinaryOp {
         }
     }
 }
+
+impl From<&String> for BinaryOp {
+    fn from(string: &String) -> Self {
+        let op = string.as_str();
+        match op {
+            "+" => Add,
+            "-" => Sub,
+            "*" => Mul,
+            "/" => Div,
+            "%" => Mod,
+            "(" => LeftParenthesis,
+            ")" => RightParenthesis,
+            "<" => LessThan,
+            "<=" => LessThanOrEq,
+            ">" => GreaterThan,
+            ">=" => GreaterThanOrEq,
+            "!=" => PartialEq,
+            "==" => StrictEq,
+            _ => None
+        }
+    }
+}
+
 
 impl BinaryOp {
     pub fn get_precedence(a: &BinaryOp, b: &BinaryOp) -> bool {

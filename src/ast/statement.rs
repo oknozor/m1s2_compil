@@ -20,6 +20,7 @@ pub enum Statement {
     FunctionDeclaration(FunctionDeclaration),
     IfStatement(IfStatement),
     SwitchStatement(SwitchStatement),
+    SwitchCase(SwitchCase),
     ForStatement(ForStatement),
     BreakStatement(BreakStatement),
     ContinueStatement(ContinueStatement),
@@ -35,39 +36,39 @@ pub struct BlockStatement {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExpressionStatement {
-    pub expression: Expression,
+    pub expression: Box<Expression>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SwitchStatement {
-    pub discriminant: Expression,
+    pub discriminant: Box<Expression>,
     pub cases: Vec<SwitchCase>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SwitchCase {
-    pub test: Option<Expression>,
-    pub consequent: Vec<Statement>,
+    pub test: Option<Box<Expression>>,
+    pub consequent: Vec<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct IfStatement {
-    pub test: Expression,
+    pub test: Box<Expression>,
     pub consequent: Box<Statement>,
     pub alternate: Option<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ForStatement {
-    pub init: Option<Expression>,
-    pub test: Option<Expression>,
+    pub init: Option<Box<Expression>>,
+    pub test: Option<Box<Expression>>,
+    pub update: Option<Box<Expression>>,
     pub body: Box<Statement>,
-    pub update: Option<Expression>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WhileStatement {
-    pub test: Expression,
+    pub test: Box<Expression>,
     pub body: Box<Statement>,
 }
 

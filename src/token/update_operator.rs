@@ -1,11 +1,13 @@
 use crate::token::operator::Operator;
 use crate::token::update_operator::UpdateOp::Increment;
 use crate::token::update_operator::UpdateOp::Decrement;
+use crate::token::update_operator::UpdateOp::None;
 
 #[derive( Clone, PartialEq)]
 pub enum UpdateOp {
     Increment,
     Decrement,
+    None
 }
 
 impl Operator for UpdateOp {
@@ -22,7 +24,19 @@ impl Operator for UpdateOp {
     fn as_str<'op>(&self) -> &'op str {
         match self {
             Increment => "++",
-            Decrement => "--"
+            Decrement => "--",
+            _ => "NaOp"
+        }
+    }
+}
+
+impl From<&String> for UpdateOp {
+    fn from(string: &String) -> Self {
+        let op = string.as_str();
+        match op {
+            "--" => Decrement,
+            "++" => Increment,
+            _ => None,
         }
     }
 }

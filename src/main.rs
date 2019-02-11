@@ -30,8 +30,8 @@ fn main() {
     let program_root = root_node.get_program_root();
     let program_root = program_root.expect("Error parsing Json AST");
 
-    let mut scope = Scope::new_anon(None);
-    scope.init_root(program_root);
+    let mut scope = Scope::init_root(None);
+    scope.build(&program_root);
 
     tail(&mut scope)
 }

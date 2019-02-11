@@ -12,16 +12,18 @@ use crate::token::assignement_operator::AssignOp;
 use crate::token::assignement_operator::AssignOp::*;
 use crate::token::literal::Literal::NumericLiteral;
 use crate::token::operator::Operator;
+use crate::token::logical_operator::LogOp;
 
 #[derive (PartialEq, Clone)]
+//CallToken
+// ControlFlows
 pub enum Token {
     Literal(Literal),
     BinaryOp(BinaryOp),
     UpdateOp(UpdateOp),
-    AssingOp(AssignOp),
-    Func(Vec<Token>),
-    Object(Vec<Token>),
-    Var(Vec<Token>),
+    AssignOp(AssignOp),
+    LogOp(LogOp),
+    Idendifier(String),
     Undefined,
 }
 
@@ -56,11 +58,11 @@ impl Token {
 
     pub fn assign(a: Literal, b: Literal, op: Token) -> Token {
         match op {
-            Token::AssingOp(AddAssign) => Token::Literal(a + b),
-            Token::AssingOp(SubAssign) => Token::Literal(a - b),
-            Token::AssingOp(MulAssign) => Token::Literal(a * b),
-            Token::AssingOp(DivAssign) => Token::Literal(a / b),
-            Token::AssingOp(ModAssign) => Token::Literal(a % b),
+            Token::AssignOp(AddAssign) => Token::Literal(a + b),
+            Token::AssignOp(SubAssign) => Token::Literal(a - b),
+            Token::AssignOp(MulAssign) => Token::Literal(a * b),
+            Token::AssignOp(DivAssign) => Token::Literal(a / b),
+            Token::AssignOp(ModAssign) => Token::Literal(a % b),
             _ => panic!("Unexpected assignment operator")
         }
     }
@@ -87,11 +89,10 @@ impl Display for Token {
             Token::Literal(b) => write!(f, "{}", b),
             Token::UpdateOp(u) => write!(f, "{}", u),
             Token::BinaryOp(o) => write!(f, "{}", o.as_str()),
-            Token::AssingOp(o) => write!(f, "{}", o.as_str()),
+            Token::AssignOp(o) => write!(f, "{}", o.as_str()),
+            Token::LogOp(o) => write!(f, "{}", o.as_str()),
             Token::Undefined => write!(f, "Undefined"),
-            Token::Func(t) => unimplemented!(),
-            Token::Var(v) => unimplemented!(),
-            Token::Object(o) => unimplemented!(),
+            Token::Idendifier(id) => write!(f, "{}", id),
         }
     }
 }
@@ -102,11 +103,10 @@ impl Debug for Token {
             Token::Literal(literal) => write!(f, "{}", literal),
             Token::UpdateOp(op) => write!(f, "{}", op),
             Token::BinaryOp(op) => write!(f, "{}", op),
-            Token::AssingOp(op) => write!(f, "{}", op),
+            Token::AssignOp(op) => write!(f, "{}", op),
+            Token::LogOp(op) => write!(f, "{}", op),
             Token::Undefined  => write!(f, "{}", "Undefined"),
-            Token::Func(t) => unimplemented!(),
-            Token::Var(v) => unimplemented!(),
-            Token::Object(o) => unimplemented!()
+            Token::Idendifier(id) => write!(f, "{}", id),
         }
     }
 }
@@ -123,7 +123,7 @@ impl Into<BinaryOp> for Token {
 impl Into<AssignOp> for Token {
     fn into(self) -> AssignOp {
         match self {
-            Token::AssingOp(b) => b,
+            Token::AssignOp(b) => b,
             _ => panic!("not a binary operator")
         }
     }

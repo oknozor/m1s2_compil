@@ -8,7 +8,7 @@ pub enum AssignOp {
     DivAssign,
     MulAssign,
     ModAssign,
-    None
+    None,
 }
 
 impl Operator for AssignOp {
@@ -32,6 +32,20 @@ impl Operator for AssignOp {
             MulAssign => "*=",
             ModAssign => "%=",
             None => "NaOp"
+        }
+    }
+}
+
+impl From<&String> for AssignOp {
+    fn from(string: &String) -> Self {
+        let op = string.as_str();
+        match op {
+            "+=" => AddAssign,
+            "-=" => SubAssign,
+            "/=" => DivAssign,
+            "*=" => MulAssign,
+            "%=" => ModAssign,
+            _ => None
         }
     }
 }
