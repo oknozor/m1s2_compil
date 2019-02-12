@@ -7,6 +7,7 @@ function blob(n) {
         return n + 1;
 
         function fizz(n) {
+            1+1;
             return n + 1;
         }
 
@@ -23,7 +24,8 @@ function blob(n) {
         }
     }
     function fofo() {
-        print("woof");
+        print("woof", 1);
+        print("pouet");
     }
 
     buzz(n);
