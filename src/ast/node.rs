@@ -2,6 +2,7 @@ use std::fs;
 use crate::ast::statement::Statement;
 
 /* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
+// Todo : Move this to expression
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum RootNode {
@@ -24,7 +25,6 @@ impl RootNode {
         match self {
             RootNode::Program(p) => Some( p.body.to_owned()),
             RootNode::File(ref f) => Some(f.program.body.to_owned()),
-            _ => None
         }
     }
 }

@@ -4,14 +4,16 @@
 
 
 use crate::token::token::Token;
-use crate::token::binary_operator::*;
-use crate::token::assignement_operator::*;
-use crate::token::update_operator::*;
-use crate::token::binary_operator::BinaryOp;
-use crate::token::unary_operator::UnaryOp;
-use crate::token::binary_operator::BinaryOp::LeftParenthesis;
-use crate::token::binary_operator::BinaryOp::RightParenthesis;
 use crate::token::literal::Literal;
+use crate::token::call::Call;
+use crate::token::operator::binary_operator::BinaryOperator::RightParenthesis;
+use crate::token::operator::binary_operator::BinaryOperator::LeftParenthesis;
+use crate::token::operator::binary_operator::BinaryOperator;
+use crate::token::operator::unary_operator::UnaryOperator;
+use crate::token::operator::update_operator::UpdateOperator;
+use crate::token::operator::assignement_operator::AssignmentOperator;
+use crate::token::operator::operator::Operator::BinOp;
+use crate::token::operator::operator::Operator::UpdateOp;
 
 pub type TokenStream = Vec<Token>;
 
@@ -151,6 +153,7 @@ impl ToToken for Box<Expression> {
             box Expression::AssignmentExpression(assign) => assign.to_token(),
             box Expression::LogicalExpression(log) => log.to_token(),
             box Expression::MemberExpression(member) => member.to_token(),
+            box Expression::CallExpression(call) => call.to_token(),
         }
     }
 }
@@ -158,12 +161,12 @@ impl ToToken for Box<Expression> {
 impl ToToken for BinaryExpression {
     fn to_token(&self) -> TokenStream {
         let mut token_stream = vec![];
-        if let Some(extra) = &self.extra { token_stream.push(Token::BinaryOp(LeftParenthesis)) }
+        if let Some(extra) = &self.extra { token_stream.push(Token::Operator(BinOp(LeftParenthesis))); }
         token_stream.extend_from_slice(self.left.to_token().as_slice());
-        let op: BinaryOp = BinaryOp::from(&self.operator);
-        token_stream.push(Token::BinaryOp(op));
+        let op: BinaryOperator = BinaryOperator::from(&self.operator);
+        token_stream.push(Token::Operator(BinOp(op)));
         token_stream.extend_from_slice(self.right.to_token().as_slice());
-        if let Some(extra) = &self.extra { token_stream.push(Token::BinaryOp(RightParenthesis)); };
+        if let Some(extra) = &self.extra { token_stream.push(Token::Operator(BinOp(LeftParenthesis))); };
         token_stream
     }
 }
@@ -171,7 +174,7 @@ impl ToToken for BinaryExpression {
 impl ToToken for UnaryExpression {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
-        let op = UnaryOp::from(&self.operator);
+        let op = UnaryOperator::from(&self.operator);
         token_stream.extend_from_slice(self.argument.to_token().as_slice());
         token_stream
     }
@@ -209,19 +212,8 @@ impl ToToken for UpdateExpression {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
         token_stream.extend_from_slice(self.argument.to_token().as_slice());
-        let op = UpdateOp::from(&self.operator);
-        token_stream.push(Token::UpdateOp(op));
-        token_stream
-    }
-}
-
-impl ToToken for CallExpression {
-    fn to_token(&self) -> Vec<Token> {
-        let mut token_stream = vec![];
-        token_stream.extend_from_slice(self.callee.to_token().as_slice());
-        self.arguments.iter().for_each(|arg|
-            token_stream.extend_from_slice(arg.to_token().as_slice())
-        );
+        let op = UpdateOperator::from(&self.operator);
+        token_stream.push(Token::Operator(UpdateOp(op)));
         token_stream
     }
 }
@@ -230,7 +222,7 @@ impl ToToken for AssignmentExpression {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
         token_stream.extend_from_slice(self.left.to_token().as_slice());
-        let op = AssignOp::from(&self.operator);
+        let op = AssignmentOperator::from(&self.operator);
         token_stream.extend_from_slice(self.right.to_token().as_slice());
         token_stream
     }
@@ -240,7 +232,7 @@ impl ToToken for LogicalExpression {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
         token_stream.extend_from_slice(self.left.to_token().as_slice());
-        let op = AssignOp::from(&self.operator);
+        let op = AssignmentOperator::from(&self.operator);
         token_stream.extend_from_slice(self.right.to_token().as_slice());
         token_stream
     }
@@ -250,6 +242,22 @@ impl ToToken for MemberExpression {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
         token_stream.extend_from_slice(self.property.to_token().as_slice());
+        token_stream
+    }
+}
+
+impl ToToken for CallExpression {
+    fn to_token(&self) -> Vec<Token> {
+        let mut token_stream = vec![];
+        let callee = self.callee.to_token();
+        let mut args = vec![];
+        self.arguments.iter().for_each(|arg|
+            args.extend_from_slice(arg.to_token().as_slice())
+        );
+
+        let call = Token::Function(Call { args, callee });
+
+        token_stream.push(call);
         token_stream
     }
 }

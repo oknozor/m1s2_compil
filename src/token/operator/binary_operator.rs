@@ -1,8 +1,8 @@
-use crate::token::operator::Operator;
-use crate::token::binary_operator::BinaryOp::*;
+use crate::token::operator::binary_operator::BinaryOperator::*;
+use crate::token::operator::operator::Operator;
 
-#[derive(Clone, PartialEq)]
-pub enum BinaryOp {
+#[derive(Clone, PartialEq, Debug)]
+pub enum BinaryOperator {
     Add,
     Sub,
     Div,
@@ -18,8 +18,7 @@ pub enum BinaryOp {
     StrictEq,
     None,
 }
-
-impl BinaryOp {
+impl BinaryOperator {
     pub fn as_str<'op>(&self) -> &'op str {
         match self {
             Add => "+",
@@ -38,9 +37,18 @@ impl BinaryOp {
             None => "Nao"
         }
     }
+
+    pub fn get_precedence(a: &BinaryOperator, b: &BinaryOperator) -> bool {
+        match (a, b) {
+            (Mul, _) => true,
+            (Div, _) => true,
+            (Mod, _) => true,
+            _ => false,
+        }
+    }
 }
 
-impl From<&String> for BinaryOp {
+impl From<&String> for BinaryOperator {
     fn from(string: &String) -> Self {
         let op = string.as_str();
         match op {
@@ -58,18 +66,6 @@ impl From<&String> for BinaryOp {
             "!=" => PartialEq,
             "==" => StrictEq,
             _ => None
-        }
-    }
-}
-
-
-impl BinaryOp {
-    pub fn get_precedence(a: &BinaryOp, b: &BinaryOp) -> bool {
-        match (a, b) {
-            (Mul, _) => true,
-            (Div, _) => true,
-            (Mod, _) => true,
-            _ => false,
         }
     }
 }

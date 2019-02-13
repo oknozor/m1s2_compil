@@ -1,7 +1,5 @@
 use crate::ast::expression::*;
 use crate::ast::statement::*;
-use crate::runner::visitor::Visitor;
-use crate::runner::handler::Handler;
 use std::fmt::Display;
 
 pub struct PrettyPrinter<'printer> {

@@ -1,8 +1,7 @@
-use crate::token::operator::Operator;
-use crate::token::unary_operator::UnaryOp::*;
+use crate::token::operator::unary_operator::UnaryOperator::*;
 
-#[derive(Clone, PartialEq)]
-pub enum UnaryOp {
+#[derive(Clone, PartialEq, Debug)]
+pub enum UnaryOperator {
     Plus,
     Minus,
     ExPoint,
@@ -10,10 +9,10 @@ pub enum UnaryOp {
     TypeOf,
     Void,
     Delete,
-    None
+    None,
 }
 
-impl UnaryOp {
+impl UnaryOperator {
     pub fn as_str<'op>(&self) -> &'op str {
         match self {
             Plus => "+",
@@ -28,7 +27,7 @@ impl UnaryOp {
     }
 }
 
-impl From<&String> for UnaryOp {
+impl From<&String> for UnaryOperator {
     fn from(string: &String) -> Self {
         let op = string.as_str();
         match op {

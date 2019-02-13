@@ -1,27 +1,14 @@
-use crate::token::operator::Operator;
-use crate::token::logical_operator::LogOp::Or;
-use crate::token::logical_operator::LogOp::And;
-use crate::token::logical_operator::LogOp::None;
+use crate::token::operator::logical_operator::LogicalOperator::*;
 
-#[derive( Clone, PartialEq)]
-pub enum LogOp {
+#[derive( Clone, PartialEq, Debug)]
+pub enum LogicalOperator {
     Or,
     And,
     None
 }
 
-impl Operator for LogOp {
-    type OperatorKind = LogOp;
-
-    fn from_str(str_op: &str) -> Self {
-        match str_op {
-            "||" => Or,
-            "&&" => And,
-            _=> None // FIXME
-        }
-    }
-
-    fn as_str<'op>(&self) -> &'op str {
+impl LogicalOperator {
+    pub fn as_str<'op>(&self) -> &'op str {
         match self {
             Or => "||",
             And => "&&",
@@ -30,7 +17,7 @@ impl Operator for LogOp {
     }
 }
 
-impl From<&String> for LogOp {
+impl From<&String> for LogicalOperator {
     fn from(string: &String) -> Self {
         let op = string.as_str();
         match op {

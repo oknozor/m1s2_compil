@@ -42,7 +42,7 @@ pub struct ExpressionStatement {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SwitchStatement {
     pub discriminant: Box<Expression>,
-    pub cases: Vec<SwitchCase>,
+    pub cases: Vec<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -79,7 +79,7 @@ pub struct BreakStatement {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ReturnStatement {
-    pub argument: Option<Expression>,
+    pub argument: Option<Box<Expression>>,
 }
 
 
@@ -108,7 +108,7 @@ pub struct VariableDeclaration {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct VariableDeclarator {
     pub id: Identifier,
-    pub init: Option<Expression>,
+    pub init: Option<Box<Expression>>,
     #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }

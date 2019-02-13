@@ -4,66 +4,86 @@ use std::fmt::Formatter;
 
 use super::literal::Literal;
 use std::fmt::Debug;
-use crate::token::binary_operator::BinaryOp;
-use crate::token::binary_operator::BinaryOp::*;
-use crate::token::update_operator::UpdateOp;
-use crate::token::update_operator::UpdateOp::*;
-use crate::token::assignement_operator::AssignOp;
-use crate::token::assignement_operator::AssignOp::*;
 use crate::token::literal::Literal::NumericLiteral;
-use crate::token::operator::Operator;
-use crate::token::logical_operator::LogOp;
+use crate::token::call::Call;
+use crate::token::control_flow::ControlFlow;
+use crate::token::control_flow::ControlFlow::*;
+use crate::scope::scope::Scope;
+use crate::token::operator::binary_operator::BinaryOperator;
+use crate::token::operator::update_operator::UpdateOperator;
+use crate::token::operator::assignement_operator::AssignmentOperator;
+use crate::token::operator::logical_operator::LogicalOperator;
+use crate::token::operator::operator::Operator;
+use crate::token::operator::update_operator::UpdateOperator::*;
+use crate::token::operator::operator::Operator::*;
 
-#[derive (PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 //CallToken
 // ControlFlows
 pub enum Token {
     Literal(Literal),
-    BinaryOp(BinaryOp),
-    UpdateOp(UpdateOp),
-    AssignOp(AssignOp),
-    LogOp(LogOp),
+    Operator(Operator),
+    //Todo: replace all Non terminal token with scopes: ControlFlow + Identifier
+    Scope(Box<Scope>),
     Idendifier(String),
+    Function(Call),
+    ControlFlow(ControlFlow),
     Undefined,
 }
 
 impl Token {
-    pub fn calc(a: Literal, b: Literal, op: Token) -> Token { //todo Result<Token, Err>
-        match op {
-            Token::BinaryOp(Add) => Token::Literal(a + b),
-            Token::BinaryOp(Sub) => Token::Literal(a - b),
-            Token::BinaryOp(Mul) => Token::Literal(a * b),
-            Token::BinaryOp(Div) => Token::Literal(a / b),
-            Token::BinaryOp(StrictEq) => Token::Literal(Literal::from(a == b)),
-            Token::BinaryOp(PartialEq) => Token::Literal(Literal::from(a != b)),
-            Token::BinaryOp(LessThan) => Token::Literal(Literal::from(a < b)),
-            Token::BinaryOp(LessThanOrEq) => Token::Literal(Literal::from(a <= b)),
-            Token::BinaryOp(GreaterThan) => Token::Literal(Literal::from(a > b)),
-            Token::BinaryOp(GreaterThanOrEq) => Token::Literal(Literal::from(a >= b)),
-            _ => {
-                panic!("unable to calculate binary expression {}, {}, {}", a.to_string(), b.to_string(), op.to_string())
+    pub fn solve_binary_expression(a: Literal, b: Literal, op: Token) -> Token { //todo Result<Token, Err>
+
+        if let Token::Operator(BinOp(binary_operator)) = op {
+            match binary_operator {
+                BinaryOperator::Add => Token::Literal(a + b),
+                BinaryOperator::Sub => Token::Literal(a - b),
+                BinaryOperator::Mul => Token::Literal(a * b),
+                BinaryOperator::Div => Token::Literal(a / b),
+                BinaryOperator::StrictEq => Token::Literal(Literal::from(a == b)),
+                BinaryOperator::PartialEq => Token::Literal(Literal::from(a != b)),
+                BinaryOperator::LessThan => Token::Literal(Literal::from(a < b)),
+                BinaryOperator::LessThanOrEq => Token::Literal(Literal::from(a <= b)),
+                BinaryOperator::GreaterThan => Token::Literal(Literal::from(a > b)),
+                BinaryOperator::GreaterThanOrEq => Token::Literal(Literal::from(a >= b)),
+                _ => {
+                    panic!("unable to calculate binary expression {}, {}, {}", a.to_string(), b.to_string(), binary_operator.to_string())
+                }
             }
+        } else {
+            //Todo :: error handling
+            Token::Undefined
         }
     }
 
     pub fn update(a: Literal, op: Token) -> Token { //todo Result<Token, Err>
-        match op {
-            Token::UpdateOp(Increment) => Token::Literal(a + NumericLiteral(1)),
-            Token::UpdateOp(Decrement) => Token::Literal(a - NumericLiteral(1)),
-            _ => {
-                panic!("unable to calculate assignment {}, {}", a.to_string(), op.to_string())
+        if let Token::Operator(UpdateOp(update_operator)) = op {
+            match update_operator {
+                UpdateOperator::Increment => Token::Literal(a + NumericLiteral(1)),
+                UpdateOperator::Decrement => Token::Literal(a - NumericLiteral(1)),
+                _ => {
+                    panic!("unable to calculate assignment {}, {}", a.to_string(), update_operator.to_string())
+                }
             }
+        } else {
+            //Todo :: error handling
+            Token::Undefined
         }
     }
 
     pub fn assign(a: Literal, b: Literal, op: Token) -> Token {
-        match op {
-            Token::AssignOp(AddAssign) => Token::Literal(a + b),
-            Token::AssignOp(SubAssign) => Token::Literal(a - b),
-            Token::AssignOp(MulAssign) => Token::Literal(a * b),
-            Token::AssignOp(DivAssign) => Token::Literal(a / b),
-            Token::AssignOp(ModAssign) => Token::Literal(a % b),
-            _ => panic!("Unexpected assignment operator")
+        if let Token::Operator(AssignOp(assign_operator)) = op {
+            match assign_operator {
+                AssignmentOperator::AddAssign => Token::Literal(a + b),
+                AssignmentOperator::SubAssign => Token::Literal(a - b),
+                AssignmentOperator::MulAssign => Token::Literal(a * b),
+                AssignmentOperator::DivAssign => Token::Literal(a / b),
+                AssignmentOperator::ModAssign => Token::Literal(a % b),
+                _ => panic!("Unexpected assignment operator")
+            }
+        } else {
+            //Todo :: error handling
+            Token::Undefined
         }
     }
 
@@ -87,12 +107,14 @@ impl Display for Token {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match &self {
             Token::Literal(b) => write!(f, "{}", b),
-            Token::UpdateOp(u) => write!(f, "{}", u),
-            Token::BinaryOp(o) => write!(f, "{}", o.as_str()),
-            Token::AssignOp(o) => write!(f, "{}", o.as_str()),
-            Token::LogOp(o) => write!(f, "{}", o.as_str()),
+            Token::Operator(op) => write!(f, "{}", op.as_str()),
             Token::Undefined => write!(f, "Undefined"),
             Token::Idendifier(id) => write!(f, "{}", id),
+            Token::Function(Call { args, callee }) => write!(f, "{:?} ({:?})", callee, args),
+            Token::ControlFlow(Return) => write!(f, "Return"),
+            Token::ControlFlow(Continue) => write!(f, "Continue"),
+            Token::ControlFlow(Break) => write!(f, "Break"),
+            Token::Scope(sc) => write!(f, "{:?}", sc)
         }
     }
 }
@@ -101,39 +123,14 @@ impl Debug for Token {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
             Token::Literal(literal) => write!(f, "{}", literal),
-            Token::UpdateOp(op) => write!(f, "{}", op),
-            Token::BinaryOp(op) => write!(f, "{}", op),
-            Token::AssignOp(op) => write!(f, "{}", op),
-            Token::LogOp(op) => write!(f, "{}", op),
-            Token::Undefined  => write!(f, "{}", "Undefined"),
+            Token::Operator(op) => write!(f, "{}", op.as_str()),
+            Token::Undefined => write!(f, "{}", "Undefined"),
             Token::Idendifier(id) => write!(f, "{}", id),
-        }
-    }
-}
-
-impl Into<BinaryOp> for Token {
-    fn into(self) -> BinaryOp {
-        match self {
-            Token::BinaryOp(b) => b,
-            _ => panic!("not a binary operator")
-        }
-    }
-}
-
-impl Into<AssignOp> for Token {
-    fn into(self) -> AssignOp {
-        match self {
-            Token::AssignOp(b) => b,
-            _ => panic!("not a binary operator")
-        }
-    }
-}
-
-impl Into<UpdateOp> for Token {
-    fn into(self) -> UpdateOp {
-        match self {
-            Token::UpdateOp(b) => b,
-            _ => panic!("not a binary operator")
+            Token::Function(Call { args, callee }) => write!(f, "Call {:?} {:?}", callee, args),
+            Token::ControlFlow(Return) => write!(f, "Return"),
+            Token::ControlFlow(Continue) => write!(f, "Continue"),
+            Token::ControlFlow(Break) => write!(f, "Break"),
+            Token::Scope(sc) => write!(f, "{:?}", sc)
         }
     }
 }

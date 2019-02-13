@@ -9,13 +9,12 @@ extern crate serde_json;
 use std::env;
 
 use crate::ast::node::RootNode;
-use crate::runner::scope::Scope;
+use crate::scope::scope::Scope;
 use crate::ast::statement::Statement;
 
 pub mod ast;
 pub mod token;
-pub mod runner;
-pub mod interpretter;
+pub mod scope;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -33,13 +32,25 @@ fn main() {
     let mut scope = Scope::init_root(None);
     scope.build(&program_root);
 
-    tail(&mut scope)
+    println!("I am Root");
+    println!("And i have {} childs", scope.childs.len());
+    scope.childs.iter().for_each(|ch| {
+        println!("{:?}:{:?}", ch.name, ch.scope_type);
+    });
+    println!("______________________________________");
+
+
+    tail(&scope, 0);
 }
 
-fn tail(scope: &mut Scope) -> () {
-    scope.childs.iter_mut().for_each(| ch| {
-        println!("{} : {:?}", ch.0, ch.1);
-        tail( ch.1)
+fn tail(scope: &Scope, depth: i32) -> () {
+    scope.childs.iter().for_each(| ch| {
+        for n in 0..depth {
+            print!("| \t\t");
+        }
+        let depth = depth + 1;
+        println!(" {:?}, {:?} -> {:?}" , ch.name, ch.scope_type, ch.token_stream);
+        tail( ch, depth);
     })
 }
 
