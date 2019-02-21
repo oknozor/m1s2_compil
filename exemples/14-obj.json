@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 144,
+  "end": 130,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 144,
+    "end": 130,
     "loc": {
       "start": {
         "line": 1,
@@ -272,7 +272,7 @@
       {
         "type": "VariableDeclaration",
         "start": 65,
-        "end": 143,
+        "end": 129,
         "loc": {
           "start": {
             "line": 2,
@@ -280,14 +280,14 @@
           },
           "end": {
             "line": 2,
-            "column": 78
+            "column": 64
           }
         },
         "declarations": [
           {
             "type": "VariableDeclarator",
             "start": 69,
-            "end": 142,
+            "end": 128,
             "loc": {
               "start": {
                 "line": 2,
@@ -295,7 +295,7 @@
               },
               "end": {
                 "line": 2,
-                "column": 77
+                "column": 63
               }
             },
             "id": {
@@ -318,7 +318,7 @@
             "init": {
               "type": "ObjectExpression",
               "start": 76,
-              "end": 142,
+              "end": 128,
               "loc": {
                 "start": {
                   "line": 2,
@@ -326,14 +326,14 @@
                 },
                 "end": {
                   "line": 2,
-                  "column": 77
+                  "column": 63
                 }
               },
               "properties": [
                 {
                   "type": "ObjectProperty",
                   "start": 78,
-                  "end": 99,
+                  "end": 96,
                   "loc": {
                     "start": {
                       "line": 2,
@@ -341,7 +341,7 @@
                     },
                     "end": {
                       "line": 2,
-                      "column": 34
+                      "column": 31
                     }
                   },
                   "method": false,
@@ -367,7 +367,7 @@
                   "value": {
                     "type": "StringLiteral",
                     "start": 85,
-                    "end": 99,
+                    "end": 96,
                     "loc": {
                       "start": {
                         "line": 2,
@@ -375,28 +375,28 @@
                       },
                       "end": {
                         "line": 2,
-                        "column": 34
+                        "column": 31
                       }
                     },
                     "extra": {
-                      "rawValue": "Okuto No Ken",
-                      "raw": "\"Okuto No Ken\""
+                      "rawValue": "Ken Jones",
+                      "raw": "\"Ken Jones\""
                     },
-                    "value": "Okuto No Ken"
+                    "value": "Ken Jones"
                   }
                 },
                 {
                   "type": "ObjectProperty",
-                  "start": 101,
-                  "end": 110,
+                  "start": 98,
+                  "end": 107,
                   "loc": {
                     "start": {
                       "line": 2,
-                      "column": 36
+                      "column": 33
                     },
                     "end": {
                       "line": 2,
-                      "column": 45
+                      "column": 42
                     }
                   },
                   "method": false,
@@ -404,16 +404,16 @@
                   "computed": false,
                   "key": {
                     "type": "Identifier",
-                    "start": 101,
-                    "end": 104,
+                    "start": 98,
+                    "end": 101,
                     "loc": {
                       "start": {
                         "line": 2,
-                        "column": 36
+                        "column": 33
                       },
                       "end": {
                         "line": 2,
-                        "column": 39
+                        "column": 36
                       },
                       "identifierName": "age"
                     },
@@ -421,16 +421,16 @@
                   },
                   "value": {
                     "type": "NumericLiteral",
-                    "start": 108,
-                    "end": 110,
+                    "start": 105,
+                    "end": 107,
                     "loc": {
                       "start": {
                         "line": 2,
-                        "column": 43
+                        "column": 40
                       },
                       "end": {
                         "line": 2,
-                        "column": 45
+                        "column": 42
                       }
                     },
                     "extra": {
@@ -442,16 +442,16 @@
                 },
                 {
                   "type": "ObjectProperty",
-                  "start": 112,
-                  "end": 140,
+                  "start": 109,
+                  "end": 126,
                   "loc": {
                     "start": {
                       "line": 2,
-                      "column": 47
+                      "column": 44
                     },
                     "end": {
                       "line": 2,
-                      "column": 75
+                      "column": 61
                     }
                   },
                   "method": false,
@@ -459,16 +459,16 @@
                   "computed": false,
                   "key": {
                     "type": "Identifier",
-                    "start": 112,
-                    "end": 118,
+                    "start": 109,
+                    "end": 115,
                     "loc": {
                       "start": {
                         "line": 2,
-                        "column": 47
+                        "column": 44
                       },
                       "end": {
                         "line": 2,
-                        "column": 53
+                        "column": 50
                       },
                       "identifierName": "surnom"
                     },
@@ -476,23 +476,23 @@
                   },
                   "value": {
                     "type": "StringLiteral",
-                    "start": 122,
-                    "end": 140,
+                    "start": 119,
+                    "end": 126,
                     "loc": {
                       "start": {
                         "line": 2,
-                        "column": 57
+                        "column": 54
                       },
                       "end": {
                         "line": 2,
-                        "column": 75
+                        "column": 61
                       }
                     },
                     "extra": {
-                      "rawValue": "Ken le survivant",
-                      "raw": "\"Ken le survivant\""
+                      "rawValue": "Kenny",
+                      "raw": "\"Kenny\""
                     },
-                    "value": "Ken le survivant"
+                    "value": "Kenny"
                   }
                 }
               ]
@@ -1126,9 +1126,9 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "Okuto No Ken",
+      "value": "Ken Jones",
       "start": 85,
-      "end": 99,
+      "end": 96,
       "loc": {
         "start": {
           "line": 2,
@@ -1136,7 +1136,7 @@
         },
         "end": {
           "line": 2,
-          "column": 34
+          "column": 31
         }
       }
     },
@@ -1153,16 +1153,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 99,
-      "end": 100,
+      "start": 96,
+      "end": 97,
       "loc": {
         "start": {
           "line": 2,
-          "column": 34
+          "column": 31
         },
         "end": {
           "line": 2,
-          "column": 35
+          "column": 32
         }
       }
     },
@@ -1179,16 +1179,16 @@
         "binop": null
       },
       "value": "age",
-      "start": 101,
-      "end": 104,
+      "start": 98,
+      "end": 101,
       "loc": {
         "start": {
           "line": 2,
-          "column": 36
+          "column": 33
         },
         "end": {
           "line": 2,
-          "column": 39
+          "column": 36
         }
       }
     },
@@ -1205,16 +1205,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 104,
-      "end": 105,
+      "start": 101,
+      "end": 102,
       "loc": {
         "start": {
           "line": 2,
-          "column": 39
+          "column": 36
         },
         "end": {
           "line": 2,
-          "column": 40
+          "column": 37
         }
       }
     },
@@ -1232,16 +1232,16 @@
         "updateContext": null
       },
       "value": 39,
-      "start": 108,
-      "end": 110,
+      "start": 105,
+      "end": 107,
       "loc": {
         "start": {
           "line": 2,
-          "column": 43
+          "column": 40
         },
         "end": {
           "line": 2,
-          "column": 45
+          "column": 42
         }
       }
     },
@@ -1258,16 +1258,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 110,
-      "end": 111,
+      "start": 107,
+      "end": 108,
       "loc": {
         "start": {
           "line": 2,
-          "column": 45
+          "column": 42
         },
         "end": {
           "line": 2,
-          "column": 46
+          "column": 43
         }
       }
     },
@@ -1284,16 +1284,16 @@
         "binop": null
       },
       "value": "surnom",
-      "start": 112,
-      "end": 118,
+      "start": 109,
+      "end": 115,
       "loc": {
         "start": {
           "line": 2,
-          "column": 47
+          "column": 44
         },
         "end": {
           "line": 2,
-          "column": 53
+          "column": 50
         }
       }
     },
@@ -1310,16 +1310,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 118,
-      "end": 119,
+      "start": 115,
+      "end": 116,
       "loc": {
         "start": {
           "line": 2,
-          "column": 53
+          "column": 50
         },
         "end": {
           "line": 2,
-          "column": 54
+          "column": 51
         }
       }
     },
@@ -1336,17 +1336,17 @@
         "binop": null,
         "updateContext": null
       },
-      "value": "Ken le survivant",
-      "start": 122,
-      "end": 140,
+      "value": "Kenny",
+      "start": 119,
+      "end": 126,
       "loc": {
         "start": {
           "line": 2,
-          "column": 57
+          "column": 54
         },
         "end": {
           "line": 2,
-          "column": 75
+          "column": 61
         }
       }
     },
@@ -1362,16 +1362,16 @@
         "postfix": false,
         "binop": null
       },
-      "start": 141,
-      "end": 142,
+      "start": 127,
+      "end": 128,
       "loc": {
         "start": {
           "line": 2,
-          "column": 76
+          "column": 62
         },
         "end": {
           "line": 2,
-          "column": 77
+          "column": 63
         }
       }
     },
@@ -1388,16 +1388,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 142,
-      "end": 143,
+      "start": 128,
+      "end": 129,
       "loc": {
         "start": {
           "line": 2,
-          "column": 77
+          "column": 63
         },
         "end": {
           "line": 2,
-          "column": 78
+          "column": 64
         }
       }
     },
@@ -1414,8 +1414,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 144,
-      "end": 144,
+      "start": 130,
+      "end": 130,
       "loc": {
         "start": {
           "line": 3,

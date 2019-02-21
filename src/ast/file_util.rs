@@ -1,35 +1,8 @@
 use std::fs;
 use crate::ast::statement::Statement;
+use crate::ast::statement::RootNode;
 
-/* Todo: explore lifetimes capabilities to use ref instead of cloned data and Box ref */
-// Todo : Move this to expression
-#[derive(Serialize, Deserialize)]
-#[serde(tag = "type")]
-pub enum RootNode {
-    Program(Program),
-    File(File),
-}
 
-#[derive(Serialize, Deserialize)]
-pub struct File {
-    pub program: Program,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Program {
-    pub body: Vec<Box<Statement>>
-}
-
-impl RootNode {
-    pub fn get_program_root(&self) -> Option<Vec<Box<Statement>>> {
-        match self {
-            RootNode::Program(p) => Some( p.body.to_owned()),
-            RootNode::File(ref f) => Some(f.program.body.to_owned()),
-        }
-    }
-}
-
-// todo: Move this into a dedicated file module
 fn read_file(path: &str) -> String {
     let filename = path;
     fs::read_to_string(filename)

@@ -1,5 +1,5 @@
 use crate::ast::expression::Expression;
-use crate::ast::expression::Identifier;
+use crate::ast::expression::Id;
 use crate::ast::expression::Loc;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -12,54 +12,71 @@ pub trait Named {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum Statement {
-    BlockStatement(BlockStatement),
-    ExpressionStatement(ExpressionStatement),
-    WhileStatement(WhileStatement),
-    VariableDeclaration(VariableDeclaration),
-    VariableDeclarator(VariableDeclarator),
-    FunctionDeclaration(FunctionDeclaration),
-    IfStatement(IfStatement),
-    SwitchStatement(SwitchStatement),
-    SwitchCase(SwitchCase),
-    ForStatement(ForStatement),
-    BreakStatement(BreakStatement),
-    ContinueStatement(ContinueStatement),
-    ReturnStatement(ReturnStatement),
+    BlockStatement(BlockStmt),
+    ExpressionStatement(ExpressionStmt),
+    WhileStatement(WhileStmt),
+    VariableDeclaration(VariableDec),
+    VariableDeclarator(Variable),
+    FunctionDeclaration(FunctionDec),
+    IfStatement(IfStmt),
+    SwitchStatement(SwitchStmt),
+    SwitchCase(CaseStmt),
+    ForStatement(ForStmt),
+    BreakStatement(BreakStmt),
+    ContinueStatement(ContinueStmt),
+    ReturnStatement(ReturnStmt),
     EmptyStatement,
     Root(Vec<Statement>),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct BlockStatement {
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum RootNode {
+    Program(Program),
+    File(File),
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct File {
+    pub program: Program,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Program {
     pub body: Vec<Box<Statement>>
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ExpressionStatement {
+pub struct BlockStmt {
+    pub body: Vec<Box<Statement>>
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ExpressionStmt {
     pub expression: Box<Expression>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct SwitchStatement {
+pub struct SwitchStmt {
     pub discriminant: Box<Expression>,
     pub cases: Vec<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct SwitchCase {
+pub struct CaseStmt {
     pub test: Option<Box<Expression>>,
     pub consequent: Vec<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct IfStatement {
+pub struct IfStmt {
     pub test: Box<Expression>,
     pub consequent: Box<Statement>,
     pub alternate: Option<Box<Statement>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ForStatement {
+pub struct ForStmt {
     pub init: Option<Box<Expression>>,
     pub test: Option<Box<Expression>>,
     pub update: Option<Box<Expression>>,
@@ -67,38 +84,36 @@ pub struct ForStatement {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct WhileStatement {
+pub struct WhileStmt {
     pub test: Box<Expression>,
     pub body: Box<Statement>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct BreakStatement {
-    pub label: Option<Identifier>,
+pub struct BreakStmt {
+    pub label: Option<Id>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ReturnStatement {
+pub struct ReturnStmt {
     pub argument: Option<Box<Expression>>,
 }
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ContinueStatement {
-    pub label: Option<Identifier>,
+pub struct ContinueStmt {
+    pub label: Option<Id>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct FunctionDeclaration {
-    pub id: Identifier,
-    // ES5 only, need to implement ES6 pattern
-    // https://github.com/estree/estree/blob/master/es5.md#patterns
-    pub params: Vec<Identifier>,
-    pub body: BlockStatement,
+pub struct FunctionDec {
+    pub id: Id,
+    pub params: Vec<Id>,
+    pub body: BlockStmt,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct VariableDeclaration {
+pub struct VariableDec {
     pub declarations: Vec<Box<Statement>>,
     pub kind: String,
     #[serde(skip_serializing_if = "super::with_loc")]
@@ -106,11 +121,20 @@ pub struct VariableDeclaration {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct VariableDeclarator {
-    pub id: Identifier,
+pub struct Variable {
+    pub id: Id,
     pub init: Option<Box<Expression>>,
     #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
+}
+
+impl RootNode {
+    pub fn get_program_root(&self) -> Option<Vec<Box<Statement>>> {
+        match self {
+            RootNode::Program(p) => Some( p.body.to_owned()),
+            RootNode::File(ref f) => Some(f.program.body.to_owned()),
+        }
+    }
 }
 
 impl Display for Loc {
@@ -135,8 +159,8 @@ impl Statement {
 
 #[test]
 fn should_get_name() {
-    let function = FunctionDeclaration {
-        id: Identifier {
+    let function = FunctionDec {
+        id: Id {
             name: "luke".to_string(),
             loc: Loc {
                 start: Pos { line: 0, column: 0 },
@@ -144,7 +168,7 @@ fn should_get_name() {
             },
         },
         params: vec![],
-        body: BlockStatement {
+        body: BlockStmt {
             body: vec![Box::new(Statement::EmptyStatement)]
         },
     };

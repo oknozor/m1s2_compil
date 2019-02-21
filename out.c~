@@ -1,0 +1,16 @@
+
+#include "c_datalib/databox.c"
+
+#include "c_datalib/print.c"
+databox x={.data.num = 10, .type=NUM };
+databox blob(databox n){
+x=add(x,n);
+
+}
+void main() {
+
+    print("i am the king\n");
+print(blob(new(1)));
+print(blob(new(2)));
+
+}

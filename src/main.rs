@@ -1,59 +1,64 @@
 #![feature(box_patterns)]
 #![feature(box_syntax)]
 extern crate serde;
-
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 
 use std::env;
+use std::fs::File;
+use std::io;
+use std::io::Write;
+use std::process::Command;
+use std::rc::Rc;
 
-use crate::ast::node::RootNode;
-use crate::scope::scope::Scope;
+use crate::ast::statement::RootNode;
 use crate::ast::statement::Statement;
+use crate::pretty_printer::PrettyPrinter;
 
 pub mod ast;
-pub mod token;
-pub mod scope;
+pub mod pretty_printer;
+pub mod to_c;
+pub mod file_writer;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
-    let json_estree =
-        if args.len() > 1 {
-            &args[1]
-        } else {
-            panic!("Usage parse {file name}");
-        };
+    let json_estree = if args.len() > 1 {
+        &args[1]
+    } else {
+        panic!("Usage parse {file name}");
+    };
 
-    let root_node: RootNode = ast::node::deserialize_json(json_estree);
+    let root_node: RootNode = ast::file_util::deserialize_json(json_estree);
     let program_root = root_node.get_program_root();
     let program_root = program_root.expect("Error parsing Json AST");
 
-    let mut scope = Scope::init_root(None);
-    scope.build(&program_root);
 
-    println!("I am Root");
-    println!("And i have {} childs", scope.childs.len());
-    scope.childs.iter().for_each(|ch| {
-        println!("{:?}:{:?}", ch.name, ch.scope_type);
-    });
-    println!("______________________________________");
+    let mut pretty = PrettyPrinter {
+        out: &mut "".to_string(),
+    };
 
+    pretty.visit_program_root(program_root);
 
-    tail(&scope, 0);
+    println!("{}", pretty.out);
+    write_to_file(pretty).expect("Error writing file");
+    compile();
 }
 
-fn tail(scope: &Scope, depth: i32) -> () {
-    scope.childs.iter().for_each(| ch| {
-        for n in 0..depth {
-            print!("| \t\t");
-        }
-        let depth = depth + 1;
-        println!(" {:?}, {:?} -> {:?}" , ch.name, ch.scope_type, ch.token_stream);
-        tail( ch, depth);
-    })
+fn write_to_file(pretty: PrettyPrinter) -> Result<(), io::Error> {
+    let mut file = File::create("out.c")?;
+    file.write_all(pretty.out.as_bytes())?;
+    Ok(())
 }
 
+fn compile() {
+    let mut gcc_cmd = Command::new("gcc");
 
+    gcc_cmd.arg("out.c");
+    gcc_cmd.arg("-g");
+    gcc_cmd.arg("-Wall");
+    gcc_cmd.arg("-o");
+    gcc_cmd.arg("out.o");
 
-
+    gcc_cmd.status().expect("Failed to compile source");
+}
