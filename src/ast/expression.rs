@@ -136,3 +136,51 @@ pub struct Property {
     pub value: Box<Expression>,
     pub kind: Option<String>,
 }
+
+impl BinaryExp {
+    pub fn has_idendifier(&self, left: &Option<&Id>, right: &Option<&Id>) -> bool {
+        if left.is_some() || right.is_some() {
+            true
+        } else {
+            false
+        }
+    }
+    #[allow(unused)]
+    pub fn has_parenthesis(&self) -> bool {
+        if let Some(extra) = &self.extra {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+impl ToString for Id {
+    fn to_string(&self) -> String {
+        self.name.clone()
+    }
+}
+
+impl ToString for NumericLit {
+    fn to_string(&self) -> String {
+        format!("{}", self.value)
+    }
+}
+
+impl ToString for StringLit {
+    fn to_string(&self) -> String {
+        self.value.clone()
+    }
+}
+
+impl NumericLit {
+    pub fn as_databox(&self) -> String {
+        format!("{{.data.num = {}, .type=NUM }}", &self.to_string())
+    }
+}
+
+impl StringLit {
+    pub fn as_databox(&self) -> String {
+        format!("{{.data.str = \"{}\", .type=STR }}", &self.to_string())
+    }
+}

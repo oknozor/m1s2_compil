@@ -1,13 +1,13 @@
 C := gcc
 CFLAGS = -g -Wall -std=c99
-.PHONY: test
+
+.PHONY: test clean
+
+archive: databox.o print.o
+	ar rsv lib_compil.a databox.o print.o
 
 test: test.o databox.o print.o
 	$(CC) $(LDFLAGS)  $^ -o $@
-
-lib: databox.c print.c
-	$(CC) $(LDFLAGS)  $^ -c -fpic -o $@
-
 run:
 	./test
 
@@ -18,7 +18,8 @@ run:
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm *.o test
+	rm -f *.o test
+	rm -f lib_compil.a
 
 
 

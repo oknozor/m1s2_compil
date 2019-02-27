@@ -1,37 +1,34 @@
-use std::collections::HashMap;
 use std::fmt::Display;
+use std::io;
 
 use crate::ast::expression::*;
 use crate::ast::expression::Expression::*;
 use crate::ast::statement::*;
 use crate::ast::statement::Statement::*;
 use crate::ast::statement::Statement;
-use crate::file_writer::CReserved::*;
-use crate::file_writer::INCLUDES;
-use crate::to_c::to_c;
+use crate::c_compile::c_write_utils::*;
 
-static STD_LIB: &[&'static str] = &["add", "mull", "div", "eq", "print"];
-
-pub struct PrettyPrinter<'printer> {
+pub struct CWriter<'printer> {
     pub out: &'printer mut String,
 }
 
 #[allow(unused)]
-impl<'pr> PrettyPrinter<'pr> {
+impl<'pr> CWriter<'pr> {
     fn with_loc() -> bool {
         true
     }
 
     pub fn visit_program_root(&mut self, e: Vec<Box<Statement>>) {
-        self.out.push_str(INCLUDES);
+        self.append(INCLUDES);
         let vars_gen = self.visit_global_vars(e);
         let func_gen = self.visit_function_declarations(vars_gen);
         let main_gen = self.visit_calls(func_gen);
-        self.out.push_str("\n}");
+        self.append(NEW_LINE);
+        self.append(BRACKET_RIGHT);
     }
 
     fn visit_calls(&mut self, e: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
-        self.out.push_str("\nvoid main() {\n");
+        self.append(MAIN);
         let mut new_root = e.clone();
         e.iter().enumerate().for_each(|(i, statement)| {
             self.visit_statement(statement);
@@ -44,7 +41,9 @@ impl<'pr> PrettyPrinter<'pr> {
         root.iter().enumerate().for_each(|(i, statement)| {
             if let box VariableDeclaration(var) = statement {
                 self.visit_variable_declaration(var);
-                new_root.remove(i);
+                /*
+                                new_root.remove(i);
+                */
             }
         });
         new_root
@@ -55,7 +54,7 @@ impl<'pr> PrettyPrinter<'pr> {
         root.iter().enumerate().for_each(|(i, statement)| {
             if let box FunctionDeclaration(function) = statement {
                 new_root.remove(i);
-                self.append(Databox.as_str());
+                self.append(DATABOX);
                 self.visit_function_declaration(function);
             };
         });
@@ -76,74 +75,75 @@ impl<'pr> PrettyPrinter<'pr> {
             ReturnStatement(r) => self.visit_return_statement(r),
             _ => (),
         }
-        self.new_line();
+        self.append(NEW_LINE);
     }
 
 
     fn visit_while_statment(&mut self, w: &WhileStmt) {
-        self.append(While.as_str());
-        self.parentesis_left();
+        self.append(WHILE);
+        self.append(PARENTHESIS_LEFT);
         self.visit_expression(&w.test);
-        self.parentesis_right();
-        self.bracket_left();
+        self.append(PARENTHESIS_RIGHT);
+        self.append(BRACKET_LEFT);
         self.visit_statement(&w.body);
-        self.bracket_right();
+        self.append(BRACKET_RIGHT);
     }
 
     fn visit_block_statement(&mut self, s: &BlockStmt) {
-        s.body
-         .iter()
-         .for_each(|statement| self.visit_statement(statement))
-    }
-    fn visit_variable_declarator(&mut self, v: &Variable) {
-        self.append(Databox.as_str());
-        self.out.push_str(&v.id.name);
-        self.visit_identifier(&v.id);
-        if let Some(box init) = &v.init {
-            self.append_equal();
-            self.append_ref(init);
-        };
-        self.semi_col();
+        s.body.iter().for_each(|statement| self.visit_statement(statement))
     }
 
-    fn append_ref(&mut self, init: &Expression) {
+    fn visit_variable_declarator(&mut self, v: &Variable) {
+        self.append(DATABOX);
+        self.append(&v.to_string());
+        if let Some(box init) = &v.init {
+            self.append(EQ);
+            self.append_ref(init);
+        };
+        self.append(SEMI_COL);
+    }
+
+    fn append_ref(&mut self, init: &Expression) -> Result<(), io::Error> {
         match init {
-            StringLiteral(ref s) => {
-                let out = s.value.clone();
-                let out = format!("{{.data.str = \"{}\", .type=STR }}", out);
-                self.out.push_str(&out);
-            }
-            NumericLiteral(n) => {
-                let out = format!("{{.data.num = {}, .type=NUM }}", n.value);
-                self.out.push_str(out.as_str());
-            }
-            _ => ()
+            StringLiteral(ref s) => Ok(self.append(&s.as_databox())),
+            NumericLiteral(n) => Ok(self.append(&n.as_databox())),
+            _ => unimplemented!()
         }
     }
 
     fn visit_while_statement(&mut self, w: &WhileStmt) {
-        self.append(While.as_str());
-        self.parentesis_left();
+        self.append(WHILE);
+        self.append(PARENTHESIS_LEFT);
         self.visit_expression(&w.test);
-        self.parentesis_right();
-        self.bracket_left();
-        self.bracket_right();
+        self.append(PARENTHESIS_RIGHT);
+        self.append(BRACKET_RIGHT);
         self.visit_statement(&w.body);
+        self.append(BRACKET_RIGHT);
     }
 
     fn visit_variable_declaration(&mut self, v: &VariableDec) {
         v.declarations.iter().for_each(|declaration| {
             if let box VariableDeclarator(declarator) = declaration {
                 self.visit_variable_declarator(&declarator);
-                self.new_line();
+                self.append(NEW_LINE);
             }
         });
     }
 
     fn visit_if_statement(&mut self, i: &IfStmt) {
-        self.out.push_str("if(");
+        self.append(IF);
+        self.append(PARENTHESIS_LEFT);
         self.visit_expression(&i.test);
+        self.append(PARENTHESIS_RIGHT);
+        self.append(BRACKET_LEFT);
         self.visit_statement(&i.consequent);
+        self.append(BRACKET_RIGHT);
+        if let Some(alternate) = &i.alternate {
+            self.append(ELSE);
+            self.append(BRACKET_LEFT);
+            self.visit_statement(alternate);
+            self.append(BRACKET_RIGHT);
+        }
     }
 
     fn visit_switch_statement(&mut self, s: &SwitchStmt) {}
@@ -155,49 +155,65 @@ impl<'pr> PrettyPrinter<'pr> {
 
     fn visit_for_statement(&mut self, f: &ForStmt) {
         self.visit_option_expression(&f.init);
+        self.append(SEMI_COL);
+        self.append(FOR);
+        self.append(PARENTHESIS_LEFT);
+
+        self.append(SEMI_COL);
         self.visit_option_expression(&f.test);
+        self.append(SEMI_COL);
         self.visit_option_expression(&f.update);
+        self.append(PARENTHESIS_RIGHT);
+        self.append(BRACKET_LEFT);
+        self.append(NEW_LINE);
         self.visit_statement(&f.body);
+        self.append(BRACKET_RIGHT);
     }
 
     fn visit_break_statement(&mut self, f: &BreakStmt) {
-        self.append(Break.as_str());
+        self.append(BREAK);
     }
 
     fn visit_continue_statement(&mut self, c: &ContinueStmt) {
-        self.append(Continue.as_str());
+        self.append(CONTINUE);
     }
 
     fn visit_return_statement(&mut self, r: &ReturnStmt) {
-        self.visit_option_expression(&r.argument);
+        self.append(RETURN);
+
+        match &r.argument {
+            Some(box NumericLiteral(_)) |
+            Some(box StringLiteral(_)) => {
+                self.append(NEW);
+                self.append(PARENTHESIS_LEFT);
+                self.visit_option_expression(&r.argument);
+                self.append(PARENTHESIS_RIGHT);
+            }
+            Some(box Identifier(id)) => self.append(&id.name),
+            _ => self.visit_option_expression(&r.argument),
+        };
+        self.append(SEMI_COL);
     }
 
     fn visit_function_declaration(&mut self, f: &FunctionDec) {
-        let identifier = self.visit_identifier(&f.id);
-
-        self.out.push_str(&identifier);
-        self.parentesis_left();
+        self.append(&f.id.to_string());
+        self.append(PARENTHESIS_LEFT);
         f.params.iter().for_each(|param| {
-            self.append(Databox.as_str());
-            self.out.push_str(param.name.as_str());
+            self.append(DATABOX);
+            self.append(param.name.as_str());
         });
-        self.parentesis_right();
-        self.bracket_left();
-        self.new_line();
+
+        self.append(PARENTHESIS_RIGHT);
+        self.append(BRACKET_LEFT);
+        self.append(NEW_LINE);
         self.visit_block_statement(&f.body);
-        self.bracket_right();
-    }
-    fn visit_identifier(&mut self, id: &Id) -> String {
-        id.name.clone()
+        self.append(BRACKET_RIGHT);
     }
 
     fn visit_expression(&mut self, exp: &Expression) {
         match exp {
-            NumericLiteral(ref n) => {
-                let out = format!("{}", n.value);
-                self.out.push_str(&out);
-            }
-            StringLiteral(ref s) => self.out.push_str(&format!("\"{}\"", &s.value)),
+            NumericLiteral(ref n) => self.append(&n.to_string()),
+            StringLiteral(ref s) => self.append(&s.to_string()),
             UpdateExpression(ref u) => self.visit_update_expression(u),
             BinaryExpression(ref b) => self.visit_binary_expression(b),
             UnaryExpression(ref u) => self.visit_unary_expression(u),
@@ -211,88 +227,63 @@ impl<'pr> PrettyPrinter<'pr> {
 
     fn visit_expression_statement(&mut self, s: &ExpressionStmt) {
         self.visit_expression(&s.expression);
-        self.semi_col();
+        self.append(SEMI_COL);
+    }
+
+    fn append_option_identifier_or_visit_expression(&mut self, identifier: &Option<&Id>, expression: &Expression) {
+        if let Some(id) = identifier {
+            self.append(&id.to_string());
+        } else {
+            self.visit_expression(expression);
+        };
     }
 
     fn visit_binary_expression(&mut self, b: &BinaryExp) {
-        let mut identifier_left =
-            if let box Identifier(left) = &b.left {
-                Some(left)
-            } else {
-                None
-            };
-        let mut identifier_right =
-            if let box Identifier(right) = &b.right {
-                Some(right)
-            } else {
-                None
-            };
-        let mut as_parenthesis =
-            if let Some(extra) =
-            &b.extra {
-                true
-            } else {
-                false
-            };
-        let as_identifier = if identifier_left.is_some() || identifier_right.is_some() {
-            true
-        } else {
-            false
-        };
-
-        let operator = &b.operator;
+        let mut option_left = &b.left.try_as_identifier();
+        let mut option_right = &b.right.try_as_identifier();
         let mut temp_expression = String::new();
-        if as_parenthesis { self.parentesis_left(); }
+        if b.has_parenthesis() { self.append(PARENTHESIS_LEFT); }
 
-        if as_identifier {
-            self.out.push_str(to_c(operator));
-            self.parentesis_left();
+        if b.has_idendifier(option_left, option_right) {
+            println!("??{}", &b.operator);
+            self.append(bin_op_to_c(&b.operator));
+            self.append(PARENTHESIS_LEFT);
 
-            if let Some(left) = identifier_left {
-                self.out.push_str(&left.name);
-            } else {
-                self.visit_expression(&b.left);
-            };
+            self.append_option_identifier_or_visit_expression(option_left, &b.left);
+            self.append(COMA);
+            self.append_option_identifier_or_visit_expression(option_right, &b.right);
 
-            self.coma();
-
-            if let Some(right) = identifier_right {
-                self.out.push_str(&right.name);
-            } else {
-                self.visit_expression(&b.right);
-            };
-
-            self.parentesis_right();
+            self.append(PARENTHESIS_RIGHT);
         } else {
             self.visit_expression(&b.left);
-            self.out.push_str(operator);
+            self.append(&b.operator);
             self.visit_expression(&b.right);
         }
-        if as_parenthesis { self.parentesis_right(); }
+        if b.has_parenthesis() { self.append(PARENTHESIS_RIGHT); }
     }
 
 
     fn visit_assign(&mut self, a: &AssignmentExp) {
         if let box Identifier(id) = &a.left {
-            self.out.push_str(&id.name);
+            let identifier = &id.to_string();
+            self.append(&id.name);
+            self.append(EQ)
         }
-        self.out.push_str(a.operator.as_str());
         self.visit_expression(&a.right);
     }
 
     fn visit_unary_expression(&mut self, u: &UnaryExp) {
-        self.out.push_str(u.operator.as_str());
+        self.append(u.operator.as_str());
         self.visit_expression(&u.argument);
     }
 
     fn visit_update_expression(&mut self, u: &UpdateExp) {
-        let expression = &u.argument;
-        self.visit_expression(&u.argument);
-        let mut arg = "";
-        match expression {
-            box Identifier(exp) => arg = &exp.name,
-            _ => unimplemented!()
-        };
+        let arg = &u.argument.try_as_identifier();
+        if let Some(idendifier) = *arg {
+            let update_c_string = update_to_c(&u.operator, &idendifier.to_string());
+            self.append(update_c_string
+                .expect("unable to parse update expression").as_str());
+        }
     }
 
     fn visit_member_expression(&mut self, m: &MemberExp) {
@@ -302,7 +293,7 @@ impl<'pr> PrettyPrinter<'pr> {
 
     fn visit_logical_expression(&mut self, l: &LogicalExp) {
         self.visit_expression(&l.left);
-        self.out.push_str(l.operator.as_str());
+        self.append(l.operator.as_str());
         self.visit_expression(&l.right);
     }
 
@@ -312,68 +303,42 @@ impl<'pr> PrettyPrinter<'pr> {
             if STD_LIB.contains(&id.name.as_str()) {
                 standard_lib_call = true;
             }
-            self.out.push_str(&id.name);
+            self.append(&id.to_string());
         }
 
-        self.parentesis_left();
+        self.append(PARENTHESIS_LEFT);
         let last = e.arguments.len() - 1;
 
         e.arguments.iter().enumerate().for_each(|(i, expression)| {
             if !standard_lib_call {
-                self.out.push_str("new");
-                self.parentesis_left();
-            }
+                        self.append(NEW);
+                        self.append(PARENTHESIS_LEFT);
+                }
+
             if let box Identifier(id) = expression {
-                self.out.push_str(&id.name);
+                self.append(&id.to_string());
             }
             self.visit_expression(expression);
-            if i != last {
-                self.out.push_str(",");
-            };
-            if !standard_lib_call {
-                self.parentesis_right();
-            }
+
+            if i != last { self.append(COMA); };
+            if !standard_lib_call { self.append(PARENTHESIS_RIGHT); }
         });
-        self.parentesis_right();
+        self.append(PARENTHESIS_RIGHT);
     }
 
-    #[allow(unused)]
     fn append(&mut self, word: &str) {
         self.out.push_str(word)
     }
-    pub fn print(&self) {
-        println!("{}", self.out)
-    }
+}
 
-    fn new_line(&mut self) {
-        self.out.push_str("\n");
-    }
-    fn semi_col(&mut self) {
-        self.out.push_str(";");
-    }
-    fn append_col(&mut self) {
-        self.out.push_str(":");
-    }
-    fn backspace(&mut self) {
-        self.out.push_str(" ");
-    }
-    fn parentesis_left(&mut self) {
-        self.out.push_str("(");
-    }
-    fn parentesis_right(&mut self) {
-        self.out.push_str(")");
-    }
-    fn bracket_left(&mut self) {
-        self.out.push_str("{");
-    }
-    fn bracket_right(&mut self) {
-        self.out.push_str("}");
-    }
-    fn coma(&mut self) {
-        self.out.push_str(",");
-    }
-    fn append_equal(&mut self) {
-        self.out.push_str("=");
+
+impl Expression {
+    fn try_as_identifier(&self) -> Option<&Id> {
+        if let Identifier(left) = &self {
+            Some(left)
+        } else {
+            None
+        }
     }
 }
 

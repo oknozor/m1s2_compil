@@ -17,6 +17,10 @@ databox new_from_str(char* a) {
   return d;
 }
 
+databox copy(databox a) {
+  return a;
+}
+
 void increment(databox* a) {
     if(a->type == NUM) {
           (a->data).num++;
@@ -98,6 +102,35 @@ databox int_add_data(int a, databox b) {
   return double_add_data ((double) a, b);
 }
 databox data_add_int(databox a, int b) {
+  return  data_add_double (a, (double) b);
+}
+
+// Sub
+databox data_sub_data(databox a, databox b) {
+    if (a.type == NUM && b.type == NUM) {
+        double result =  a.data.num - b.data.num;
+        databox out =  {.data.num = result};
+        return out;
+    } else {
+      exit(1);
+    }
+}
+
+databox double_sub_data(double a, databox b) {
+    databox a_as_data = {.data.num = a};
+    databox out = data_add_data(b, a_as_data);
+    return out;
+}
+
+databox data_sub_double(databox a, double b) {
+  return double_add_data (b, a);
+}
+
+databox int_sub_data(int a, databox b){
+  return double_add_data ((double) a, b);
+}
+
+databox data_sub_int(databox a, int b) {
   return  data_add_double (a, (double) b);
 }
 
@@ -189,6 +222,5 @@ int int_less_than_data(int a, databox b) {
 int data_less_than_int(databox a, int b) {
     return int_greater_than_data(b, a);
 }
-
 
 

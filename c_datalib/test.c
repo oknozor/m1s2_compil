@@ -1,7 +1,6 @@
 #include "databox.h"
 #include "print.h"
 #include <assert.h>
-#include <stdio.h>
 
 #define true 1
 #define false 0
@@ -17,6 +16,7 @@ void test_inc() {
     assert(one.data.num == 2.0);
     printf("%f", one.data.num);
 }
+
 
 void test_print() {
     printf("\n PRINT() TEST : \n");
@@ -36,10 +36,10 @@ void test_print() {
 
 void test_new() {
     printf("\n NEW() TEST : \n");
-    databox a = new_from_str("coucou");
+    databox a = new_from_str("brand new bag");
     databox b = new_from_int(22);
     databox c = new_from_double(12.0);
-    assert(a.data.str == "coucou");
+    assert(a.data.str == "brand new bag");
     assert(a.type == STR);
     assert(b.type == NUM);
     assert(c.type == NUM);
@@ -86,7 +86,15 @@ void test_generic_lt() {
 
 void test_add() {
     double number = 1;
-    databox result = double_add_data(number, one);
+    databox result = add(number, one);
+    printf("testing databox + number: \n");
+    assert(result.data.num);
+    printf("result: %f + %f = %f Ok!\n", one.data.num, number, result.data.num);
+}
+
+void test_sub() {
+    double number = 1;
+    databox result = sub(number, one);
     printf("testing databox + number: \n");
     assert(result.data.num);
     printf("result: %f + %f = %f Ok!\n", one.data.num, number, result.data.num);
@@ -116,6 +124,8 @@ int main() {
     test_generic_lt();
     test_greater_than();
     test_inc();
+    test_add();
+    test_sub();
     test_mul();
     test_print();
     return 0;

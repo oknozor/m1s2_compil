@@ -3,9 +3,11 @@ name = "pretty_printer"
 version = "0.1.0"
 authors = ["okno <paul.delafosse@protonmail.com>"]
 edition = "2018"
+build = "build.rs"
 
 [dependencies]
 serde = "1.0.85"
 serde_json = "1.0"
 serde_derive = "1.0.85"
-lazy_static = "1.2.0"
+clap = "2.32"
+cc = "1.0"

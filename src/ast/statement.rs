@@ -4,7 +4,6 @@ use crate::ast::expression::Loc;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Error;
-use crate::ast::expression::Pos;
 
 pub trait Named {
     fn get_name(&self) -> String;
@@ -128,6 +127,12 @@ pub struct Variable {
     pub loc: Loc,
 }
 
+impl ToString for Variable {
+    fn to_string(&self) -> String {
+        self.id.name.clone()
+    }
+}
+
 impl RootNode {
     pub fn get_program_root(&self) -> Option<Vec<Box<Statement>>> {
         match self {
@@ -137,6 +142,7 @@ impl RootNode {
     }
 }
 
+
 impl Display for Loc {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "start: {}:{}, end: {}:{}",
@@ -145,37 +151,6 @@ impl Display for Loc {
                self.end.line,
                self.end.column)
     }
-}
-
-impl Statement {
-    pub fn get_name(&self) -> Option<String> {
-        match self {
-            Statement::FunctionDeclaration(ref func) => Some(func.id.name.clone()),
-            Statement::VariableDeclarator(ref v) => Some(v.id.name.clone()),
-            _ => None
-        }
-    }
-}
-
-#[test]
-fn should_get_name() {
-    let function = FunctionDec {
-        id: Id {
-            name: "luke".to_string(),
-            loc: Loc {
-                start: Pos { line: 0, column: 0 },
-                end: Pos { line: 0, column: 0 },
-            },
-        },
-        params: vec![],
-        body: BlockStmt {
-            body: vec![Box::new(Statement::EmptyStatement)]
-        },
-    };
-
-    let statement = Statement::FunctionDeclaration(function);
-
-    assert_eq!("luke", statement.get_name().unwrap());
 }
 
 
