@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use std::io;
 
 use crate::ast::expression::*;
 use crate::ast::expression::Expression::*;
@@ -33,6 +32,7 @@ impl<'pr> CWriter<'pr> {
         e.iter().enumerate().for_each(|(i, statement)| {
             self.visit_statement(statement);
         });
+        self.append(END);
         new_root
     }
 
@@ -73,8 +73,9 @@ impl<'pr> CWriter<'pr> {
             BreakStatement(b) => self.visit_break_statement(b),
             ContinueStatement(c) => self.visit_continue_statement(c),
             ReturnStatement(r) => self.visit_return_statement(r),
+            SwitchCase(case) => self.visit_case(case),
             _ => (),
-        }
+        };
         self.append(NEW_LINE);
     }
 
@@ -103,11 +104,11 @@ impl<'pr> CWriter<'pr> {
         self.append(SEMI_COL);
     }
 
-    fn append_ref(&mut self, init: &Expression) -> Result<(), io::Error> {
+    fn append_ref(&mut self, init: &Expression) {
         match init {
-            StringLiteral(ref s) => Ok(self.append(&s.as_databox())),
-            NumericLiteral(n) => Ok(self.append(&n.as_databox())),
-            _ => unimplemented!()
+            StringLiteral(ref s) => self.append(&s.as_databox()),
+            NumericLiteral(n) => self.append(&n.as_databox()),
+            _ => self.visit_expression(init)
         }
     }
 
@@ -146,7 +147,31 @@ impl<'pr> CWriter<'pr> {
         }
     }
 
-    fn visit_switch_statement(&mut self, s: &SwitchStmt) {}
+    fn visit_switch_statement(&mut self, s: &SwitchStmt) {
+        self.append(SWITCH);
+        self.append(BRACKET_LEFT);
+        self.visit_expression(&s.discriminant);
+        &s.cases.iter().for_each(|case| {
+            self.visit_case(case);
+        });
+        self.append(BRACKET_RIGHT);
+    }
+
+    fn visit_case(&mut self, case: &CaseStmt) {
+        self.append(CASE);
+        self.append(COL);
+        self.append(" ");
+        if let Some(test) = &case.test {
+            self.visit_expression(test);
+        }
+        self.append(NEW_LINE);
+        &case.consequent.iter().for_each(|consequent| {
+            self.visit_statement(consequent);
+        });
+        self.append(BREAK);
+        self.append(SEMI_COL);
+    }
+
     fn visit_option_expression(&mut self, exp: &Option<Box<Expression>>) {
         if let Some(expression) = exp {
             self.visit_expression(&expression);
@@ -172,10 +197,12 @@ impl<'pr> CWriter<'pr> {
 
     fn visit_break_statement(&mut self, f: &BreakStmt) {
         self.append(BREAK);
+        self.append(SEMI_COL);
     }
 
     fn visit_continue_statement(&mut self, c: &ContinueStmt) {
         self.append(CONTINUE);
+        self.append(SEMI_COL);
     }
 
     fn visit_return_statement(&mut self, r: &ReturnStmt) {
@@ -245,7 +272,6 @@ impl<'pr> CWriter<'pr> {
         if b.has_parenthesis() { self.append(PARENTHESIS_LEFT); }
 
         if b.has_idendifier(option_left, option_right) {
-            println!("??{}", &b.operator);
             self.append(bin_op_to_c(&b.operator));
             self.append(PARENTHESIS_LEFT);
 
@@ -263,13 +289,26 @@ impl<'pr> CWriter<'pr> {
     }
 
 
+    /// if the assignment operator is equal,  use the new macro from std
+    /// else generate a binary expression from the assignment and visit it
     fn visit_assign(&mut self, a: &AssignmentExp) {
         if let box Identifier(id) = &a.left {
             let identifier = &id.to_string();
             self.append(&id.name);
-            self.append(EQ)
+            self.append(EQ);
+            if &a.operator != EQ {
+                let assign_bin_op = assign_to_c(id.clone(),
+                                                &a.operator,
+                                                a.right.clone(),
+                                                a.loc.clone());
+                self.visit_binary_expression(&assign_bin_op);
+            } else {
+                self.append(NEW);
+                self.append(PARENTHESIS_LEFT);
+                self.visit_expression(&a.right);
+                self.append(PARENTHESIS_RIGHT);
+            }
         }
-        self.visit_expression(&a.right);
     }
 
     fn visit_unary_expression(&mut self, u: &UnaryExp) {
@@ -311,9 +350,9 @@ impl<'pr> CWriter<'pr> {
 
         e.arguments.iter().enumerate().for_each(|(i, expression)| {
             if !standard_lib_call {
-                        self.append(NEW);
-                        self.append(PARENTHESIS_LEFT);
-                }
+                self.append(NEW);
+                self.append(PARENTHESIS_LEFT);
+            }
 
             if let box Identifier(id) = expression {
                 self.append(&id.to_string());

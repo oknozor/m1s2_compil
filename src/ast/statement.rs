@@ -58,7 +58,7 @@ pub struct ExpressionStmt {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SwitchStmt {
     pub discriminant: Box<Expression>,
-    pub cases: Vec<Box<Statement>>,
+    pub cases: Vec<Box<CaseStmt>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -15,6 +15,7 @@ fn main() {
     let databox_h = fs::read_to_string("c_datalib/databox.h")
         .expect("Failed to read file with path : c_datalib/databox.c")
         .clone()
+        .replace("\\", "\\\\")
         .replace("\"", "\\\"");
 
     let print_c = fs::read_to_string("c_datalib/print.c")
@@ -25,6 +26,8 @@ fn main() {
     let print_h = fs::read_to_string("c_datalib/print.h")
         .expect("Failed to read file with path : c_datalib/print.h")
         .clone()
+        .replace("\\", "\\\\")
+
         .replace("\"", "\\\"");
 
     let out_dir = env::var("OUT_DIR").unwrap();

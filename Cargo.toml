@@ -1,5 +1,5 @@
 [package]
-name = "pretty_printer"
+name = "rjsc"
 version = "0.1.0"
 authors = ["okno <paul.delafosse@protonmail.com>"]
 edition = "2018"

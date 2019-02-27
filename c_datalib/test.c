@@ -1,6 +1,7 @@
 #include "databox.h"
 #include "print.h"
 #include <assert.h>
+#include <stdio.h>
 
 #define true 1
 #define false 0
