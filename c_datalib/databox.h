@@ -1,20 +1,15 @@
 #ifndef DATABOX_H
 #define DATABOX_H
-
 #include <string.h>
-
-typedef void (funct_t)(void *);
 
 typedef enum type_e {
     NUM,
     STR,
-    FUNC
 } type_e;
 
 typedef union data_u {
     double num;
     char *str;
-    funct_t * f;
 } data_u;
 
 typedef struct databox {
@@ -26,7 +21,6 @@ databox copy(databox a);
 databox new_from_int(int a);
 databox new_from_double(double a);
 databox new_from_str(char *a);
-databox new_from_func(funct_t f);
 
 void decrement(databox *a);
 void increment(databox *a);

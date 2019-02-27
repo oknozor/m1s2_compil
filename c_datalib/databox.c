@@ -17,10 +17,6 @@ databox new_from_str(char *a) {
     return d;
 }
 
-databox new_from_func(funct_t f) {
-    databox d = {.data.f = f, .type=FUNC};
-}
-
 databox copy(databox a) {
     return a;
 }

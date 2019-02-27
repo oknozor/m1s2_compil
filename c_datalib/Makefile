@@ -8,6 +8,13 @@ archive: databox.o print.o
 
 test: test.o databox.o print.o
 	$(CC) $(LDFLAGS)  $^ -o $@
+
+dict_example: dict_example.c dict.o keyval.o
+	$(CC) $(LDFLAGS) $^ -o $@
+
+
+dict_example.o: keyval.o dict.o
+
 run:
 	./test
 
@@ -20,6 +27,7 @@ run:
 clean:
 	rm -f *.o test
 	rm -f lib_compil.a
+	rm -f dict_example
 
 
 
