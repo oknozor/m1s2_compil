@@ -205,8 +205,6 @@ int def_2(double a);
         databox: int_eq_data,                           \
         default: def)                                   \
 
-#endif
-
 #define neq(a, b) _Generic((a),                         \
         double:  neq_given_double(b),                   \
         int:     neq_given_int(b),                      \
@@ -226,6 +224,6 @@ int def_2(double a);
         databox: int_neq_data,                          \
         default: def)                                   \
 
-
+#endif
 
 

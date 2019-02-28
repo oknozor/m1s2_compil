@@ -6,14 +6,14 @@ CFLAGS = -g -Wall -std=c99
 archive: databox.o print.o
 	ar rsv lib_compil.a databox.o print.o
 
-test: test.o databox.o print.o
+test: test.o print.o dict.o keyval.o databox.o
 	$(CC) $(LDFLAGS)  $^ -o $@
 
 dict_example: dict_example.c dict.o keyval.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 
-dict_example.o: keyval.o dict.o
+dict_example.o: keyval.o dict.o databox.o
 
 run:
 	./test

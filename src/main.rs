@@ -21,6 +21,9 @@ use crate::c_compile::c_writer::CWriter;
 pub mod ast;
 pub mod file_util;
 pub mod c_compile;
+pub mod visitor;
+pub mod interpret;
+
 
 const DATABOX_H_PATH: &'static str = "databox.h";
 const DATABOX_C_PATH: &'static str = "databox.c";
