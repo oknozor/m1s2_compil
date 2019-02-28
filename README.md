@@ -14,9 +14,16 @@
 - with bin
 ```./target/debug/jsparser ${path_to_ast_json_file}```
 
+## Literals :
+    - StringLiteral
+    - NumericLiteral
+    - BooleanLiteral)
+    - NullLiteral
+    - Infinity
+
 ## Todo :
 
-- implement debbuging
+- implement loc
 - implement the other control flow expression
 - implement interpretter for function and object
 - add unit test for operator overloading
@@ -29,3 +36,19 @@
 
 - remote dirty copy with the Cell/RefCell type or a custom Box<> implementation
 - implement a custom deserializer for JSLiteral or flatten the Expression struct
+
+```
+#include "c_datalib/databox.h"
+#include <stdio.h>
+
+void main() {
+    databox x = {.data.num = 0};
+    double *ptx = &(x.data.num);
+    printf("%f", ptx);
+    while (*ptx < 10) {
+        *ptx+=1;
+        printf("%f\n", *ptx);
+    }
+
+} 
+```

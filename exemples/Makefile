@@ -14,9 +14,6 @@ $(JSONS): %.json: %.js
 $(patsubst %.js,%.ast,$(SOURCES)): %.ast: %.json
 	jq '.program.body | del(..|.start?) | del(..|.end?) | del(..|.loc?) | del (..|.extra?) | del(..|.leadingComments?) | del(..|.trailingComments?)' < $<
 
-move: 
-	mv *.json ../examples
-
 clean:
 	rm -rf *.json
 

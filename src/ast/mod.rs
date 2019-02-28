@@ -1,10 +1,9 @@
-pub mod node;
+use crate::ast::expression::Loc;
+
 pub mod statement;
 pub mod expression;
-pub mod literal;
-pub mod operator;
-pub mod token;
-pub mod update_operator;
-pub mod binary_operator;
-pub mod assignement_operator;
-pub mod function;
+
+#[allow(unused)]
+pub fn with_loc(loc: &Loc) -> bool {
+    true
+}

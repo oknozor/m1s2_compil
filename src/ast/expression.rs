@@ -1,131 +1,186 @@
 // serde cannot untag or flatten a nested enum for now
 // see : https://github.com/serde-rs/serde/issues/1402
 // could be useful for literals
-// Todo: add a 'ast lifetime to get rid of the heap
 
-use crate::ast::literal::JSLiteral;
-use crate::runner::context::RunnerOption;
-
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum Expression {
-    BinaryExpression(BinaryExpression),
-    UnaryExpression(UnaryExpression),
-    NumericLiteral(JSLiteral<i64>),
-    StringLiteral(JSLiteral<String>),
-    Identifier(Identifier),
-    UpdateExpression(UpdateExpression),
-    CallExpression(CallExpression),
-    AssignmentExpression(AssignmentExpression),
-    LogicalExpression(LogicalExpression),
-    MemberExpression(MemberExpression),
+    BinaryExpression(BinaryExp),
+    UnaryExpression(UnaryExp),
+    NumericLiteral(NumericLit),
+    StringLiteral(StringLit),
+    Identifier(Id),
+    UpdateExpression(UpdateExp),
+    CallExpression(CallExp),
+    AssignmentExpression(AssignmentExp),
+    LogicalExpression(LogicalExp),
+    MemberExpression(MemberExp),
+    ObjectExpression(ObjectExp),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct Identifier {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Id {
     pub name: String,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct StringLiteral {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct StringLit {
     pub value: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct NumericLiteral {
-    pub value: i64,
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct NumericLit {
+    pub value: f64,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct UpdateExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct UpdateExp {
     pub operator: String,
     pub argument: Box<Expression>,
     prefix: bool,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct CallExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct CallExp {
     pub callee: Box<Expression>,
     pub arguments: Vec<Box<Expression>>,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct BinaryExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct BinaryExp {
     pub left: Box<Expression>,
     pub operator: String,
     pub right: Box<Expression>,
     pub extra: Option<Extra>,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Extra {
     pub parenthesized: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct UnaryExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct UnaryExp {
     pub operator: String,
     pub prefix: bool,
     pub argument: Box<Expression>,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct AssignmentExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct AssignmentExp {
     pub operator: String,
     pub left: Box<Expression>,
     pub right: Box<Expression>,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct LogicalExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct LogicalExp {
     pub operator: String,
     pub left: Box<Expression>,
     pub right: Box<Expression>,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct MemberExpression {
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MemberExp {
     pub object: Box<Expression>,
     pub property: Box<Expression>,
     pub computed: bool,
-    #[serde(skip_serializing_if = "RunnerOption::with_loc")]
+    #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Loc {
     pub start: Pos,
     pub end: Pos,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Pos {
-    pub line: i64,
-    pub column: i64,
+    pub line: f64,
+    pub column: f64,
 }
 
-/*pub struct ObjectExpression {
-    pub properties: [ Property ],
-}*/
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "type")]
+pub struct JSLiteral<T> {
+    pub value: T
+}
 
-//todo: generic literal
-/*pub struct Property {
-    pub key: Result< <T: Literal>, Identifier>,
-    pub value: Expression,
-    pub kind: String,
-}*/
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "type")]
+pub struct ObjectExp {
+    pub properties: Vec<Box<Property>>
+}
+
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "type")]
+pub struct Property {
+    pub key: Box<Expression>,
+    pub value: Box<Expression>,
+    pub kind: Option<String>,
+}
+
+impl BinaryExp {
+    pub fn has_idendifier(&self, left: &Option<&Id>, right: &Option<&Id>) -> bool {
+        if left.is_some() || right.is_some() {
+            true
+        } else {
+            false
+        }
+    }
+    #[allow(unused)]
+    pub fn has_parenthesis(&self) -> bool {
+        if let Some(extra) = &self.extra {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+impl ToString for Id {
+    fn to_string(&self) -> String {
+        self.name.clone()
+    }
+}
+
+impl ToString for NumericLit {
+    fn to_string(&self) -> String {
+        format!("{}", self.value)
+    }
+}
+
+impl ToString for StringLit {
+    fn to_string(&self) -> String {
+        self.value.clone()
+    }
+}
+
+impl NumericLit {
+    pub fn as_databox(&self) -> String {
+        format!("{{.data.num = {}, .type=NUM }}", &self.to_string())
+    }
+}
+
+impl StringLit {
+    pub fn as_databox(&self) -> String {
+        format!("{{.data.str = \"{}\", .type=STR }}", &self.to_string())
+    }
+}
