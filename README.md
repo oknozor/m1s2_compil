@@ -1,8 +1,12 @@
 # Compil TP 1
 
-# Prérequis
+### Dependencies
 - rustc 1.34.0-nightly
 - cargo
+- gcc 
+- babylon
+- GNU indent (optional)
+
 
 ### build
 
