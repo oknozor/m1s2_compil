@@ -142,7 +142,6 @@ impl RootNode {
     }
 }
 
-
 impl Display for Loc {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "start: {}:{}, end: {}:{}",

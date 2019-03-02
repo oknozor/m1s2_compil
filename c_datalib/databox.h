@@ -1,15 +1,18 @@
 #ifndef DATABOX_H
 #define DATABOX_H
 #include <string.h>
+#include "dict.h"
 
 typedef enum type_e {
     NUM,
     STR,
+    DICT,
 } type_e;
 
 typedef union data_u {
     double num;
     char *str;
+    dictionary dict;
 } data_u;
 
 typedef struct databox {
@@ -21,6 +24,7 @@ databox copy(databox a);
 databox new_from_int(int a);
 databox new_from_double(double a);
 databox new_from_str(char *a);
+databox new_object(dictionary dict);
 
 void decrement(databox *a);
 void increment(databox *a);

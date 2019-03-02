@@ -1,7 +1,25 @@
+use crate::ast::statement::*;
+use crate::ast::expression::*;
+use crate::ast::statement::Statement::*;
+
 pub  trait Visitor {
 
     // statement
-    fn visit_statement(&mut self, s: &Statement);
+    fn visit_statement(&mut self, s: &Statement) {
+        match s {
+            BlockStatement(b) => self.visit_block_statement(b),
+            ExpressionStatement(e) => self.visit_expression_statement(e),
+            WhileStatement(v) => self.visit_while_statment(v),
+            IfStatement(i) => self.visit_if_statement(i),
+            SwitchStatement(s) => self.visit_switch_statement(s),
+            ForStatement(f) => self.visit_for_statement(f),
+            BreakStatement(b) => self.visit_break_statement(b),
+            ContinueStatement(c) => self.visit_continue_statement(c),
+            ReturnStatement(r) => self.visit_return_statement(r),
+            SwitchCase(case) => self.visit_case(case),
+            _ => (),
+        };
+    }
     fn visit_while_statment(&mut self, w: &WhileStmt);
     fn visit_block_statement(&mut self, s: &BlockStmt);
     fn visit_variable_declarator(&mut self, v: &Variable);
@@ -14,10 +32,10 @@ pub  trait Visitor {
     fn visit_break_statement(&mut self, f: &BreakStmt);
     fn visit_return_statement(&mut self, r: &ReturnStmt);
     fn visit_continue_statement(&mut self, c: &ContinueStmt);
+    fn visit_function_declaration(&mut self, f: &FunctionDec);
 
     //expression
     fn visit_option_expression(&mut self, exp: &Option<Box<Expression>>);
-    fn visit_function_declaration(&mut self, f: &FunctionDec);
     fn visit_expression(&mut self, exp: &Expression);
     fn visit_expression_statement(&mut self, s: &ExpressionStmt);
     fn visit_binary_expression(&mut self, b: &BinaryExp);
