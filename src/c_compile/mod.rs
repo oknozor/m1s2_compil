@@ -13,8 +13,8 @@ pub const STD_LT: &'static str = "lt";
 pub const STD_PRINT: &'static str = "print";
 
 pub const STD_LIB: &[&'static str] = &["add", "mull", "div", "eq", "print", "sub"];
-pub const INCLUDES: &'static str = "   \n#include \"print.c\
-                                        \"\n#include \"databox.c\"\n";
+pub const INCLUDES: &'static str = "   \n#include \"print.h\"\n
+                                         #include \"databox.h\"\n";
 pub const MAIN: &'static str = "\nint main() {\n";
 pub const END: &'static str = "\nreturn 0;";
 
@@ -34,7 +34,7 @@ pub const IF: &'static str = "if";
 pub const ELSE: &'static str = "else";
 
 pub const NEW: &'static str = "new";
-pub const NEW_DICT: &'static str = "databox_new_object()";
+pub const NEW_DICT: &'static str = "new_object()";
 pub const SWITCH: &'static str = "switch ";
 pub const CASE: &'static str = "case ";
 pub const BREAK: &'static str = "break ";

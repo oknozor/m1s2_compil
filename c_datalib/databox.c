@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-databox new_object() {
+databox new_object(void) {
     databox d = {.data.dict = dictionary_new(), .type= DICT};
     return d;
 }

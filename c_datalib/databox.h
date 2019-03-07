@@ -12,7 +12,7 @@ typedef enum type_e {
 typedef union data_u {
     double num;
     char *str;
-    dictionary dict;
+    dictionary *dict;
 } data_u;
 
 typedef struct databox {
@@ -24,7 +24,7 @@ databox copy(databox a);
 databox new_from_int(int a);
 databox new_from_double(double a);
 databox new_from_str(char *a);
-databox new_object();
+databox new_object(void);
 
 void decrement(databox *a);
 void increment(databox *a);

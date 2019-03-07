@@ -311,6 +311,8 @@ impl<'pr> Visitor for  CWriter<'pr> {
         let prop_id = p.key.try_as_string_from_lit().or(p.key.try_as_string_from_identifier());
         let prop_id = prop_id.expect("unable to parse object property id");
         let value = self.get_ref_as_str(&p.value, id.to_string());
+/*
         self.append(&format!("dictionary_add({}.dict, \"{}\" , new)", id, prop_id, &value.clone()));
+*/
     }
 }
