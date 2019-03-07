@@ -34,6 +34,7 @@ pub const IF: &'static str = "if";
 pub const ELSE: &'static str = "else";
 
 pub const NEW: &'static str = "new";
+pub const NEW_DICT: &'static str = "databox_new_object()";
 pub const SWITCH: &'static str = "switch ";
 pub const CASE: &'static str = "case ";
 pub const BREAK: &'static str = "break ";

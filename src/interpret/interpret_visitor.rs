@@ -101,4 +101,12 @@ impl <'ast> Visitor for Interpreter {
     fn visit_call_expression(&mut self, e: &CallExp) {
         unimplemented!()
     }
+
+    fn visit_object_expression(&mut self, o: &ObjectExp, id: String) {
+        unimplemented!()
+    }
+
+    fn visit_property_expression(&mut self, id: &str, p: &Property) {
+        unimplemented!()
+    }
 }

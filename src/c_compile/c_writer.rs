@@ -62,11 +62,18 @@ impl <'pr> CWriter <'pr> {
         new_root
     }
 
-    pub fn append_ref(&mut self, init: &Expression) {
+    pub fn get_ref_as_str(&mut self, init: &Expression, id: String) -> String {
         match init {
-            StringLiteral(ref s) => self.append(&s.as_databox()),
-            NumericLiteral(n) => self.append(&n.as_databox()),
-            _ => self.visit_expression(init)
+            StringLiteral(ref s) => s.as_databox(),
+            NumericLiteral(n) => n.as_databox(),
+            ObjectExpression(ref o) => {
+                self.visit_object_expression(&o, id);
+                o.as_databox()
+            }
+            _ => {
+                self.visit_expression(init);
+                "".to_string()
+            }
         }
     }
 
@@ -86,8 +93,22 @@ impl <'pr> CWriter <'pr> {
 
 impl Expression {
     pub fn try_as_identifier(&self) -> Option<&Id> {
-        if let Identifier(left) = &self {
-            Some(left)
+        if let Identifier(id) = &self {
+            Some(id)
+        } else {
+            None
+        }
+    }
+    pub fn try_as_string_from_lit(&self) -> Option<String> {
+        if let StringLiteral(lit) = &self {
+            Some(lit.value.clone())
+        } else {
+            None
+        }
+    }
+    pub fn try_as_string_from_identifier(&self) -> Option<String> {
+        if let Identifier(id) = &self {
+            Some(id.name.clone())
         } else {
             None
         }

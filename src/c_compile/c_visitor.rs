@@ -46,7 +46,8 @@ impl<'pr> Visitor for  CWriter<'pr> {
         self.append(&v.to_string());
         if let Some(box init) = &v.init {
             self.append(EQ);
-            self.append_ref(init);
+            let var_as_databox_str = &self.get_ref_as_str(init, v.id.name.clone());
+            self.append(var_as_databox_str);
         };
         self.append(SEMI_COL);
     }
@@ -294,5 +295,22 @@ impl<'pr> Visitor for  CWriter<'pr> {
             if !standard_lib_call { self.append(PARENTHESIS_RIGHT); }
         });
         self.append(PARENTHESIS_RIGHT);
+    }
+
+    fn visit_object_expression(&mut self, e: &ObjectExp, id: String) {
+        self.append(NEW_DICT);
+        self.append(SEMI_COL);
+        self.append(NEW_LINE);
+
+        e.properties.iter().for_each(|prop| {
+            self.visit_property_expression( &id, prop);
+        })
+    }
+
+    fn visit_property_expression(&mut self, id: &str, p: &Property) {
+        let prop_id = p.key.try_as_string_from_lit().or(p.key.try_as_string_from_identifier());
+        let prop_id = prop_id.expect("unable to parse object property id");
+        let value = self.get_ref_as_str(&p.value, id.to_string());
+        self.append(&format!("dictionary_add({}.dict, \"{}\" , new)", id, prop_id, &value.clone()));
     }
 }

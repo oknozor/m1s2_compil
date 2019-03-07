@@ -2,8 +2,7 @@ use crate::ast::statement::*;
 use crate::ast::expression::*;
 use crate::ast::statement::Statement::*;
 
-pub  trait Visitor {
-
+pub trait Visitor {
     // statement
     fn visit_statement(&mut self, s: &Statement) {
         match s {
@@ -45,4 +44,6 @@ pub  trait Visitor {
     fn visit_member_expression(&mut self, m: &MemberExp);
     fn visit_logical_expression(&mut self, l: &LogicalExp);
     fn visit_call_expression(&mut self, e: &CallExp);
+    fn visit_object_expression(&mut self, o: &ObjectExp, id: String);
+    fn visit_property_expression(&mut self, id: &str, p: &Property);
 }

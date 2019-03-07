@@ -24,7 +24,7 @@ databox copy(databox a);
 databox new_from_int(int a);
 databox new_from_double(double a);
 databox new_from_str(char *a);
-databox new_object(dictionary dict);
+databox new_object();
 
 void decrement(databox *a);
 void increment(databox *a);

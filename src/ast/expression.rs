@@ -184,3 +184,9 @@ impl StringLit {
         format!("{{.data.str = \"{}\", .type=STR }}", &self.to_string())
     }
 }
+
+impl ObjectExp {
+    pub fn as_databox(&self) -> String {
+        format!("{{.data.dict = new_dictionnary(), .type=DICT }};\n")
+    }
+}

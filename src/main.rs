@@ -30,6 +30,10 @@ const DATABOX_H_PATH: &'static str = "databox.h";
 const DATABOX_C_PATH: &'static str = "databox.c";
 const PRINT_H_PATH: &'static str = "print.h";
 const PRINT_C_PATH: &'static str = "print.c";
+const DICT_H_PATH: &'static str = "dict.h";
+const DICT_C_PATH: &'static str = "dict.c";
+const KEYVAL_H_PATH: &'static str = "keyval.h";
+const KEYVAL_C_PATH: &'static str = "keyval.c";
 
 /// this is the genrated rust code that contains c_datalib as rust const
 include!(concat!(env!("OUT_DIR"), "/c_lib.rs"));
@@ -134,11 +138,19 @@ fn copy_lib() {
     let f_databox_c = File::create(DATABOX_C_PATH);
     let f_print_h = File::create(PRINT_H_PATH);
     let f_print_c = File::create(PRINT_C_PATH);
+    let f_dict_h = File::create(DICT_H_PATH);
+    let f_dict_c = File::create(DICT_C_PATH);
+    let f_keyval_h = File::create(KEYVAL_H_PATH);
+    let f_keyval_c = File::create(KEYVAL_C_PATH);
 
     f_databox_h.unwrap().write_all(DATABOX_H.as_bytes()).expect(c_lib_file_error);
     f_databox_c.unwrap().write_all(DATABOX_C.as_bytes()).expect(c_lib_file_error);
     f_print_h.unwrap().write_all(PRINT_H.as_bytes()).expect(c_lib_file_error);
     f_print_c.unwrap().write_all(PRINT_C.as_bytes()).expect(c_lib_file_error);
+    f_dict_h.unwrap().write_all(DICT_H.as_bytes()).expect(c_lib_file_error);
+    f_dict_c.unwrap().write_all(DICT_C.as_bytes()).expect(c_lib_file_error);
+    f_keyval_h.unwrap().write_all(KEYVAL_H.as_bytes()).expect(c_lib_file_error);
+    f_keyval_c.unwrap().write_all(KEYVAL_C.as_bytes()).expect(c_lib_file_error);
 }
 
 /// Write the generated source to file with an optional filename
@@ -180,6 +192,10 @@ fn clean_filesystem(keep: bool, filename: &str) -> Result<(), io::Error> {
         fs::remove_file(DATABOX_C_PATH)?;
         fs::remove_file(PRINT_H_PATH)?;
         fs::remove_file(PRINT_C_PATH)?;
+        fs::remove_file(DICT_H_PATH)?;
+        fs::remove_file(DICT_C_PATH)?;
+        fs::remove_file(KEYVAL_H_PATH)?;
+        fs::remove_file(KEYVAL_C_PATH)?;
         let filename_c = format!("{}.c", filename);
         fs::remove_file(filename_c)?;
     }
