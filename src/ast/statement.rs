@@ -4,6 +4,7 @@ use crate::ast::expression::Loc;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Error;
+use std::cell::RefCell;
 
 pub trait Named {
     fn get_name(&self) -> String;
@@ -125,6 +126,12 @@ pub struct Variable {
     pub init: Option<Box<Expression>>,
     #[serde(skip_serializing_if = "super::with_loc")]
     pub loc: Loc,
+    #[serde(default = "delay")]
+    pub delayed:  RefCell<bool>,
+}
+
+pub fn delay() -> RefCell<bool> {
+    RefCell::new(true)
 }
 
 impl ToString for Variable {
@@ -141,7 +148,6 @@ impl RootNode {
         }
     }
 }
-
 
 impl Display for Loc {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {

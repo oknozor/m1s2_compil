@@ -2,7 +2,8 @@
 **/*.rs.bk
 *.idea
 .vscode*
-c_datalib/*.o
-c_datalib/*.a
+**/*.o
+**/*.a
+**/rjsc
 c_datalib/test
 Cargo.lock

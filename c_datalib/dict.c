@@ -19,7 +19,7 @@ static void dictionary_add_keyval(dictionary *in, keyval *kv) {
 }
 
 void dictionary_add(dictionary *in, char *key, void *value) {
-    if(!key){fprintf(stderr, "NULL is not a valid key.\n"); abort();}
+    if(!key){fprintf(stderr, "NULL is not a valid key."); abort();}
     dictionary_add_keyval(in, keyval_new(key, value));
 }
 

@@ -1,15 +1,18 @@
 #ifndef DATABOX_H
 #define DATABOX_H
 #include <string.h>
+#include "dict.h"
 
 typedef enum type_e {
     NUM,
     STR,
+    DICT,
 } type_e;
 
 typedef union data_u {
     double num;
     char *str;
+    dictionary *dict;
 } data_u;
 
 typedef struct databox {
@@ -21,6 +24,7 @@ databox copy(databox a);
 databox new_from_int(int a);
 databox new_from_double(double a);
 databox new_from_str(char *a);
+databox new_object();
 
 void decrement(databox *a);
 void increment(databox *a);
@@ -205,8 +209,6 @@ int def_2(double a);
         databox: int_eq_data,                           \
         default: def)                                   \
 
-#endif
-
 #define neq(a, b) _Generic((a),                         \
         double:  neq_given_double(b),                   \
         int:     neq_given_int(b),                      \
@@ -226,6 +228,6 @@ int def_2(double a);
         databox: int_neq_data,                          \
         default: def)                                   \
 
-
+#endif
 
 

@@ -2,6 +2,8 @@
 // see : https://github.com/serde-rs/serde/issues/1402
 // could be useful for literals
 
+use crate::ast::expression::Expression::*;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum Expression {
@@ -28,11 +30,15 @@ pub struct Id {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StringLit {
     pub value: String,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NumericLit {
     pub value: f64,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -118,14 +124,10 @@ pub struct Pos {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
-pub struct JSLiteral<T> {
-    pub value: T
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(tag = "type")]
 pub struct ObjectExp {
-    pub properties: Vec<Box<Property>>
+    pub properties: Vec<Box<Property>>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 
@@ -173,14 +175,22 @@ impl ToString for StringLit {
     }
 }
 
-impl NumericLit {
-    pub fn as_databox(&self) -> String {
-        format!("{{.data.num = {}, .type=NUM }}", &self.to_string())
-    }
-}
 
-impl StringLit {
-    pub fn as_databox(&self) -> String {
-        format!("{{.data.str = \"{}\", .type=STR }}", &self.to_string())
+// probably a more elegant way to do this(trait) but it will do for now
+impl Expression {
+    pub fn get_loc(&self) -> Loc{
+         match self {
+            BinaryExpression(exp) => exp.loc.clone(),
+            UnaryExpression(exp)=> exp.loc.clone(),
+            NumericLiteral(exp)=> exp.loc.clone(),
+            StringLiteral(exp)=> exp.loc.clone(),
+            Identifier(exp)=> exp.loc.clone(),
+            UpdateExpression(exp)=> exp.loc.clone(),
+            CallExpression(exp)=> exp.loc.clone(),
+            AssignmentExpression(exp)=> exp.loc.clone(),
+            LogicalExpression(exp)=> exp.loc.clone(),
+            MemberExpression(exp)=> exp.loc.clone(),
+            ObjectExpression(exp)=> exp.loc.clone()
+        }
     }
 }

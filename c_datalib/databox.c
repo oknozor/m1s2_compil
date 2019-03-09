@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
+databox new_object(void) {
+    databox d = {.data.dict = dictionary_new(), .type= DICT};
+    return d;
+}
+
 databox new_from_int(int a) {
     return new_from_double((double) a);
 }

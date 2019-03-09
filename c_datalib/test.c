@@ -40,10 +40,13 @@ void test_new() {
     databox a = new_from_str("brand new bag");
     databox b = new_from_int(22);
     databox c = new_from_double(12.0);
+    databox obj = new_object();
+
     assert(a.data.str == "brand new bag");
     assert(a.type == STR);
     assert(b.type == NUM);
     assert(c.type == NUM);
+    assert(obj.type == DICT);
 }
 
 void test_eq() {
@@ -120,6 +123,17 @@ void test_greater_than() {
     result = data_greater_than_data(box_42, hello);
     assert(result == 0);
 }
+
+void test_dict() {
+    dictionary *dict = dictionary_new();
+    databox kevin = new_from_str("Eeasy peasy lemon squizzy");
+    databox jason = new_from_str("le cheval c'est génial");
+    dictionary_add(dict, "kevin", &kevin);
+    dictionary_add(dict, "jason", &jason);
+    printf("TESTING DICT : \n");
+    print_data(*(databox*) dictionary_find(dict, "jason"));
+}
+
 int main() {
     test_generic_gt();
     test_generic_lt();
@@ -129,5 +143,6 @@ int main() {
     test_sub();
     test_mul();
     test_print();
+    test_dict();
     return 0;
 }
