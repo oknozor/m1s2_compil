@@ -117,13 +117,14 @@ fn main() {
     // build c source from estree
     writer.visit_program_root(program_root);
     write_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
+    compile_libs(filename);
     compile(filename, verbose, debug);
 
     if indent {
         let mut gnu_indent = Command::new("indent");
         gnu_indent.arg(format!("{}.c", filename));
         gnu_indent.status().expect("Error while indenting file, is GNU indent installed?");
-    }
+    };
 
 
     clean_filesystem(keep_c, filename)
@@ -174,30 +175,60 @@ fn generate_estree(js_source: &str) -> Result<String, FromUtf8Error> {
 /// Compile generated source with gcc, at last !
 fn compile(filename: &str, verbose: bool, debug: bool) {
     let mut gcc_cmd = Command::new("gcc");
-    let filename_c = format!("{}.c", filename);
-    let filename_bin = filename;
-    gcc_cmd.arg(filename_c);
+    gcc_cmd.arg("databox.o");
+    gcc_cmd.arg("print.o");
+    gcc_cmd.arg("dict.o");
+    gcc_cmd.arg("keyval.o");
+    gcc_cmd.arg(format!("{}.o", filename));
     if verbose { gcc_cmd.arg("-Wall"); };
     if debug { gcc_cmd.arg("-g"); };
     gcc_cmd.arg("-o");
-    gcc_cmd.arg(filename_bin);
+    gcc_cmd.arg(filename);
     gcc_cmd.status().expect("Failed to compile source");
+}
+
+
+fn compile_libs(filename: &str) {
+    let mut gcc_cmd = Command::new("gcc");
+    gcc_cmd.arg("-c");
+    gcc_cmd.arg(DATABOX_C_PATH);
+    gcc_cmd.arg(DATABOX_H_PATH);
+    gcc_cmd.arg(PRINT_C_PATH);
+    gcc_cmd.arg(PRINT_H_PATH);
+    gcc_cmd.arg(DICT_C_PATH);
+    gcc_cmd.arg(DICT_H_PATH);
+    gcc_cmd.arg(KEYVAL_C_PATH);
+    gcc_cmd.arg(KEYVAL_H_PATH);
+    gcc_cmd.arg(format!("{}.c", filename));
+    gcc_cmd.status().expect("Failed to compile libs");
 }
 
 
 // Just remove the mess
 fn clean_filesystem(keep: bool, filename: &str) -> Result<(), io::Error> {
     if !keep {
-        fs::remove_file(DATABOX_H_PATH)?;
         fs::remove_file(DATABOX_C_PATH)?;
-        fs::remove_file(PRINT_H_PATH)?;
         fs::remove_file(PRINT_C_PATH)?;
-        fs::remove_file(DICT_H_PATH)?;
         fs::remove_file(DICT_C_PATH)?;
-        fs::remove_file(KEYVAL_H_PATH)?;
         fs::remove_file(KEYVAL_C_PATH)?;
-        let filename_c = format!("{}.c", filename);
-        fs::remove_file(filename_c)?;
+
+        fs::remove_file(DATABOX_H_PATH)?;
+        fs::remove_file(PRINT_H_PATH)?;
+        fs::remove_file(DICT_H_PATH)?;
+        fs::remove_file(KEYVAL_H_PATH)?;
+
+        fs::remove_file("databox.o")?;
+        fs::remove_file("print.o")?;
+        fs::remove_file("keyval.o")?;
+        fs::remove_file("dict.o")?;
+
+        fs::remove_file(format!("{}.gch", DATABOX_H_PATH))?;
+        fs::remove_file(format!("{}.gch", KEYVAL_H_PATH))?;
+        fs::remove_file(format!("{}.gch", DICT_H_PATH))?;
+        fs::remove_file(format!("{}.gch", PRINT_H_PATH))?;
+
+        fs::remove_file(format!("{}.c", filename))?;
+        fs::remove_file(format!("{}.o", filename))?;
     }
     Ok(())
 }

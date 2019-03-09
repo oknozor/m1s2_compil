@@ -40,10 +40,13 @@ void test_new() {
     databox a = new_from_str("brand new bag");
     databox b = new_from_int(22);
     databox c = new_from_double(12.0);
+    databox obj = new_object();
+
     assert(a.data.str == "brand new bag");
     assert(a.type == STR);
     assert(b.type == NUM);
     assert(c.type == NUM);
+    assert(obj.type == DICT);
 }
 
 void test_eq() {
@@ -130,6 +133,7 @@ void test_dict() {
     printf("TESTING DICT : \n");
     print_data(*(databox*) dictionary_find(dict, "jason"));
 }
+
 int main() {
     test_generic_gt();
     test_generic_lt();

@@ -6,21 +6,26 @@ use crate::c_compile::*;
 use crate::c_compile::c_write_utils::*;
 use crate::c_compile::c_writer::CWriter;
 use crate::visitor::Visitor;
+use std::cell::RefCell;
+use rand::Rng;
+use rand::distributions::Alphanumeric;
+use rand::thread_rng;
 
 impl<'pr> Visitor for  CWriter<'pr> {
 
     // statement
     fn visit_statement(&mut self, s: &Statement) {
         match s {
-            BlockStatement(b) => self.visit_block_statement(b),
-            ExpressionStatement(e) => self.visit_expression_statement(e),
-            WhileStatement(v) => self.visit_while_statment(v),
-            IfStatement(i) => self.visit_if_statement(i),
-            SwitchStatement(s) => self.visit_switch_statement(s),
-            ForStatement(f) => self.visit_for_statement(f),
-            BreakStatement(b) => self.visit_break_statement(b),
-            ContinueStatement(c) => self.visit_continue_statement(c),
-            ReturnStatement(r) => self.visit_return_statement(r),
+            BlockStatement(block) => self.visit_block_statement(block),
+            VariableDeclaration(var) => self.visit_variable_declaration(var),
+            ExpressionStatement(exp) => self.visit_expression_statement(exp),
+            WhileStatement(wh) => self.visit_while_statment(wh),
+            IfStatement(if_stmt) => self.visit_if_statement(if_stmt),
+            SwitchStatement(sw_stmt) => self.visit_switch_statement(sw_stmt),
+            ForStatement(for_stmt) => self.visit_for_statement(for_stmt),
+            BreakStatement(break_stmt) => self.visit_break_statement(break_stmt),
+            ContinueStatement(ctn_stmt) => self.visit_continue_statement(ctn_stmt),
+            ReturnStatement(ret_stmt) => self.visit_return_statement(ret_stmt),
             SwitchCase(case) => self.visit_case(case),
             _ => (),
         };
@@ -42,14 +47,20 @@ impl<'pr> Visitor for  CWriter<'pr> {
     }
 
     fn visit_variable_declarator(&mut self, v: &Variable) {
-        self.append(DATABOX);
-        self.append(&v.to_string());
-        if let Some(box init) = &v.init {
-            self.append(EQ);
-            let var_as_databox_str = &self.get_ref_as_str(init, v.id.name.clone());
-            self.append(var_as_databox_str);
-        };
+
+        if !*v.delayed.borrow() {
+            if let Some(box init) = &v.init {
+                self.append(&v.to_string());
+                self.append(EQ);
+                &self.append_ref_as_databox(init, v.id.name.clone());
+            };
+        } else {
+            self.append(DATABOX);
+            self.append(&v.to_string());
+        }
+
         self.append(SEMI_COL);
+        *v.delayed.borrow_mut() = false;
     }
 
     fn visit_while_statement(&mut self, w: &WhileStmt) {
@@ -298,21 +309,27 @@ impl<'pr> Visitor for  CWriter<'pr> {
     }
 
     fn visit_object_expression(&mut self, e: &ObjectExp, id: String) {
-        self.append(NEW_DICT);
-        self.append(SEMI_COL);
-        self.append(NEW_LINE);
-
         e.properties.iter().for_each(|prop| {
             self.visit_property_expression( &id, prop);
         })
     }
 
     fn visit_property_expression(&mut self, id: &str, p: &Property) {
-        let prop_id = p.key.try_as_string_from_lit().or(p.key.try_as_string_from_identifier());
-        let prop_id = prop_id.expect("unable to parse object property id");
-        let value = self.get_ref_as_str(&p.value, id.to_string());
-/*
-        self.append(&format!("dictionary_add({}.dict, \"{}\" , new)", id, prop_id, &value.clone()));
-*/
+        self.append(DATABOX);
+        let warning = format!("Object property at {} key must be a string literal", &p.key.get_loc());
+        let prop_id = &p.key.try_as_string_from_identifier().or(p.key.try_as_string_from_lit());
+        let prop_id = &prop_id.clone().expect(&warning);
+
+        // generate a random variable name for object properties so we can use databoxes everywhere.
+        let mut rstr: String = thread_rng().sample_iter(&Alphanumeric).take(7).collect();
+        rstr.insert(0, 'A');
+        self.append(&rstr);
+        self.append(EQ);
+        self.append_ref_as_databox(&p.value, id.to_string());
+        self.append(SEMI_COL);
+        self.append(NEW_LINE);
+
+        self.append(&format!("dictionary_add({}.data.dict, \"{}\" , &{});", id, prop_id, rstr));
+        self.append(NEW_LINE);
     }
 }

@@ -28,6 +28,7 @@ clean:
 	rm -f *.o test
 	rm -f lib_compil.a
 	rm -f dict_example
+	rm -f *.gch
 
 
 

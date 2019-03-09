@@ -18,41 +18,38 @@ impl <'pr> CWriter <'pr> {
         true
     }
 
-    pub fn visit_program_root(&mut self, e: Vec<Box<Statement>>) {
+    pub fn visit_program_root(&mut self, root_nodes: Vec<Box<Statement>>) {
         self.append(INCLUDES);
-        let vars_gen = self.visit_global_vars(e);
+        let vars_gen = self.visit_global_vars(root_nodes);
         let func_gen = self.visit_function_declarations(vars_gen);
         let main_gen = self.visit_calls(func_gen);
         self.append(NEW_LINE);
         self.append(BRACKET_RIGHT);
     }
 
-    fn visit_calls(&mut self, e: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
+    fn visit_calls(&mut self, nodes: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
         self.append(MAIN);
-        let mut new_root = e.clone();
-        e.iter().enumerate().for_each(|(i, statement)| {
+        let mut new_root = nodes.clone();
+        nodes.iter().enumerate().for_each(|(i, statement)| {
             self.visit_statement(statement);
         });
         self.append(END);
         new_root
     }
 
-    fn visit_global_vars(&mut self, root: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
-        let mut new_root = root.clone();
-        root.iter().enumerate().for_each(|(i, statement)| {
+    fn visit_global_vars(&mut self, nodes: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
+        let mut new_root = nodes.clone();
+        new_root.iter().enumerate().for_each(|(i, statement)| {
             if let box VariableDeclaration(var) = statement {
                 self.visit_variable_declaration(var);
-                /*
-                                new_root.remove(i);
-                */
             }
         });
         new_root
     }
 
-    fn visit_function_declarations(&mut self, root: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
-        let mut new_root = root.clone();
-        root.iter().enumerate().for_each(|(i, statement)| {
+    fn visit_function_declarations(&mut self, nodes: Vec<Box<Statement>>) -> Vec<Box<Statement>> {
+        let mut new_root = nodes.clone();
+        nodes.iter().enumerate().for_each(|(i, statement)| {
             if let box FunctionDeclaration(function) = statement {
                 new_root.remove(i);
                 self.append(DATABOX);
@@ -62,17 +59,24 @@ impl <'pr> CWriter <'pr> {
         new_root
     }
 
-    pub fn get_ref_as_str(&mut self, init: &Expression, id: String) -> String {
+    pub fn append_ref_as_databox(&mut self, init: &Expression, id: String) {
         match init {
-            StringLiteral(ref s) => s.as_databox(),
-            NumericLiteral(n) => n.as_databox(),
+            StringLiteral(ref s) => {
+                let as_databox = format!("new(\"{}\")", &s.to_string());
+                self.append(&as_databox);
+            },
+            NumericLiteral(n) => {
+                let as_databox = format!("new({})", &n.to_string());
+                self.append(&as_databox);
+            },
             ObjectExpression(ref o) => {
+                self.append(NEW_DICT);
+                self.append(SEMI_COL);
+                self.append(NEW_LINE);
                 self.visit_object_expression(&o, id);
-                o.as_databox()
             }
             _ => {
                 self.visit_expression(init);
-                "".to_string()
             }
         }
     }
