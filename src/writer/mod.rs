@@ -1,0 +1,10 @@
+pub const PARENTHESIS_LEFT: &'static str = "(";
+pub const PARENTHESIS_RIGHT: &'static str = ")";
+pub const BRACKET_LEFT: &'static str = "{";
+pub const BRACKET_RIGHT: &'static str = "}";
+pub const EQ: &'static str = "=";
+pub const NEW_LINE: &'static str = "\n";
+pub const SEMI_COL: &'static str = ";";
+pub const COL: &'static str = ":";
+pub const COMA: &'static str = ",";
+pub const TAB: &'static str = "\t";

@@ -18,16 +18,6 @@ pub const INCLUDES: &'static str = "   \n#include \"print.h\"\n
 pub const MAIN: &'static str = "\nint main() {\n";
 pub const END: &'static str = "\nreturn 0;";
 
-pub const PARENTHESIS_LEFT: &'static str = "(";
-pub const PARENTHESIS_RIGHT: &'static str = ")";
-pub const BRACKET_LEFT: &'static str = "{";
-pub const BRACKET_RIGHT: &'static str = "}";
-pub const EQ: &'static str = "=";
-pub const NEW_LINE: &'static str = "\n";
-pub const SEMI_COL: &'static str = ";";
-pub const COL: &'static str = ":";
-pub const COMA: &'static str = ",";
-
 pub const WHILE: &'static str = "while";
 pub const FOR: &'static str = "for";
 pub const IF: &'static str = "if";

@@ -10,10 +10,6 @@ impl <'ast> Visitor for Interpreter {
         unimplemented!()
     }
 
-    fn visit_while_statment(&mut self, w: &WhileStmt) {
-        unimplemented!()
-    }
-
     fn visit_block_statement(&mut self, s: &BlockStmt) {
         unimplemented!()
     }

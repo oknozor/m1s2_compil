@@ -17,11 +17,14 @@ use clap::Arg;
 
 use crate::ast::statement::RootNode;
 use crate::c_compile::c_writer::CWriter;
+use crate::asm_compile::asm_writer::ASMWriter;
+use crate::asm_compile::Register;
 
 pub mod ast;
 pub mod file_util;
 pub mod c_compile;
 pub mod visitor;
+pub mod writer;
 pub mod interpret;
 pub mod asm_compile;
 
@@ -45,8 +48,6 @@ fn main() {
         .about("A simple Javascipt to C compiler")
         .arg(Arg::with_name("SOURCE")
             .help("Name of the target javascript file")
-            .short("s")
-            .long("source")
             .required(true)
             .index(1))
         .arg(Arg::with_name("out")
@@ -54,7 +55,7 @@ fn main() {
             .required(false)
             .value_name("OUT")
             .short("o")
-            .short("out"))
+            .long("out"))
         .arg(Arg::with_name("indent")
             .short("i")
             .long("indent")
@@ -62,7 +63,7 @@ fn main() {
         .arg(Arg::with_name("keep-ast")
             .help("let the estree json file in place after compilation")
             .long("keep-ast")
-            .short("a")
+            .short("t")
             .long("keep-ast")
             .required(false))
         .arg(Arg::with_name("verbose")
@@ -75,18 +76,24 @@ fn main() {
             .short("d")
             .help("compile with gcc debug flag")
             .required(false))
-        .arg(Arg::with_name("keep-c")
-            .long("keep-c")
-            .short("c")
+        .arg(Arg::with_name("keep-source")
+            .long("keep-source")
+            .short("k")
             .help("let the C generated source in place after compilation")
+            .required(false))
+        .arg(Arg::with_name("asm-gen")
+            .long("asm-gen")
+            .short("a")
+            .help("compile to ASM")
             .required(false))
         .get_matches();
 
     // Collect command line args
     let source = matches.value_of("SOURCE");
+    let asm = matches.is_present("asm-gen");
     let verbose = matches.is_present("verbose");
     let indent = matches.is_present("indent");
-    let keep_c = matches.is_present("keep-c");
+    let keep_c = matches.is_present("keep-source");
     let keep_ast = matches.is_present("keep-ast");
     let filename = matches.value_of("out").unwrap_or("out");
     let debug = matches.is_present("debug");
@@ -100,7 +107,7 @@ fn main() {
         let estree_filename = format!("{}.json", filename);
         let estree_file = File::create(estree_filename);
         estree_file.unwrap().write_all(json_estree.clone().as_bytes())
-            .expect("Error writing AST to file");
+                   .expect("Error writing AST to file");
     }
 
 
@@ -108,32 +115,42 @@ fn main() {
     let program_root = root_node.get_program_root();
     let program_root = program_root.expect("Error parsing Json AST");
 
-    let mut writer = CWriter {
-        out: &mut "".to_string(),
-    };
+    if asm {
+        let mut writer = ASMWriter {
+            out: &mut "".to_string(),
+            reg: Register::RAX
+        };
+        writer.visit_program_root(program_root.clone());
+        write_asm_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
 
-    copy_lib();
+    } else {
+        let mut writer = CWriter {
+            out: &mut "".to_string(),
+        };
 
-    // build c source from estree
-    writer.visit_program_root(program_root);
-    write_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
-    compile_libs(filename);
-    compile(filename, verbose, debug);
+        copy_c_lib();
 
-    if indent {
-        let mut gnu_indent = Command::new("indent");
-        gnu_indent.arg(format!("{}.c", filename));
-        gnu_indent.status().expect("Error while indenting file, is GNU indent installed?");
-    };
+        // build c source from estree
+        writer.visit_program_root(program_root);
+        write_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
+        compile_libs(filename);
+        compile(filename, verbose, debug);
+
+        if indent {
+            let mut gnu_indent = Command::new("indent");
+            gnu_indent.arg(format!("{}.c", filename));
+            gnu_indent.status().expect("Error while indenting file, is GNU indent installed?");
+        };
 
 
-    clean_filesystem(keep_c, filename)
-        .expect("Something went wrong while removing generated sources");
+        clean_filesystem(keep_c, filename)
+            .expect("Something went wrong while removing generated sources");
+    }
 }
 
 
 // create the c_library files in the current directory
-fn copy_lib() {
+fn copy_c_lib() {
     let c_lib_file_error = "Error writing the standard library";
     let f_databox_h = File::create(DATABOX_H_PATH);
     let f_databox_c = File::create(DATABOX_C_PATH);
@@ -158,6 +175,14 @@ fn copy_lib() {
 fn write_to_file(filename: &str, pretty: CWriter) -> Result<(), io::Error> {
     let filename_c = format!("{}.c", filename);
     let mut file = File::create(filename_c)?;
+    file.write_all(pretty.out.as_bytes())?;
+    Ok(())
+}
+
+/// Write the generated ASM source to file with an optional filename
+fn write_asm_to_file(filename: &str, pretty: ASMWriter) -> Result<(), io::Error> {
+    let filename_s = format!("{}.s", filename);
+    let mut file = File::create(filename_s)?;
     file.write_all(pretty.out.as_bytes())?;
     Ok(())
 }
