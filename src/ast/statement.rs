@@ -31,7 +31,7 @@ pub enum Statement {
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum RootNode {
+pub enum RootStatement {
     Program(Program),
     File(File),
 }
@@ -54,18 +54,24 @@ pub struct BlockStmt {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExpressionStmt {
     pub expression: Box<Expression>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SwitchStmt {
     pub discriminant: Box<Expression>,
     pub cases: Vec<Box<CaseStmt>>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CaseStmt {
     pub test: Option<Box<Expression>>,
     pub consequent: Vec<Box<Statement>>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -73,6 +79,8 @@ pub struct IfStmt {
     pub test: Box<Expression>,
     pub consequent: Box<Statement>,
     pub alternate: Option<Box<Statement>>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -81,28 +89,38 @@ pub struct ForStmt {
     pub test: Option<Box<Expression>>,
     pub update: Option<Box<Expression>>,
     pub body: Box<Statement>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WhileStmt {
     pub test: Box<Expression>,
     pub body: Box<Statement>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BreakStmt {
     pub label: Option<Id>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ReturnStmt {
     pub argument: Option<Box<Expression>>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ContinueStmt {
     pub label: Option<Id>,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -110,6 +128,8 @@ pub struct FunctionDec {
     pub id: Id,
     pub params: Vec<Id>,
     pub body: BlockStmt,
+    #[serde(skip_serializing_if = "super::with_loc")]
+    pub loc: Loc,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -140,11 +160,11 @@ impl ToString for Variable {
     }
 }
 
-impl RootNode {
+impl RootStatement {
     pub fn get_program_root(&self) -> Option<Vec<Box<Statement>>> {
         match self {
-            RootNode::Program(p) => Some( p.body.to_owned()),
-            RootNode::File(ref f) => Some(f.program.body.to_owned()),
+            RootStatement::Program(p) => Some( p.body.to_owned()),
+            RootStatement::File(ref f) => Some(f.program.body.to_owned()),
         }
     }
 }

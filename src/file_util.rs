@@ -1,5 +1,5 @@
 use std::fs;
-use crate::ast::statement::RootNode;
+use crate::ast::statement::RootStatement;
 
 
 fn read_file(path: &str) -> String {
@@ -9,15 +9,15 @@ fn read_file(path: &str) -> String {
         .clone()
 }
 
-pub fn deserialize_json_file(path: &str) -> RootNode {
+pub fn deserialize_json_file(path: &str) -> RootStatement {
     let file = read_file(path);
-    let program: RootNode = serde_json::from_str(file.as_str())
+    let program: RootStatement = serde_json::from_str(file.as_str())
         .expect("Unable to parse json file");
     program
 }
 
-pub fn deserialize_json(json: &str) -> RootNode {
-    let program: RootNode = serde_json::from_str(json)
+pub fn deserialize_json(json: &str) -> RootStatement {
+    let program: RootStatement = serde_json::from_str(json)
         .expect("Unable to parse json file");
     program
 }

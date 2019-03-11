@@ -15,10 +15,11 @@ use std::string::FromUtf8Error;
 use clap::App;
 use clap::Arg;
 
-use crate::ast::statement::RootNode;
-use crate::c_compile::c_writer::CWriter;
 use crate::asm_compile::asm_writer::ASMWriter;
 use crate::asm_compile::Register;
+use crate::ast::statement::RootStatement;
+use crate::c_compile::c_writer::CWriter;
+use crate::token::token::RootNode;
 
 pub mod ast;
 pub mod file_util;
@@ -27,6 +28,7 @@ pub mod visitor;
 pub mod writer;
 pub mod interpret;
 pub mod asm_compile;
+pub mod token;
 
 
 const DATABOX_H_PATH: &'static str = "databox.h";
@@ -79,18 +81,24 @@ fn main() {
         .arg(Arg::with_name("keep-source")
             .long("keep-source")
             .short("k")
-            .help("let the C generated source in place after compilation")
+            .help("let the C/ASM generated source in place after compilation")
             .required(false))
         .arg(Arg::with_name("asm-gen")
             .long("asm-gen")
             .short("a")
             .help("compile to ASM")
             .required(false))
+        .arg(Arg::with_name("interpret")
+            .long("interpret")
+            .short("p")
+            .help("interpret source file")
+            .required(false))
         .get_matches();
 
     // Collect command line args
     let source = matches.value_of("SOURCE");
     let asm = matches.is_present("asm-gen");
+    let interpret = matches.is_present("interpret");
     let verbose = matches.is_present("verbose");
     let indent = matches.is_present("indent");
     let keep_c = matches.is_present("keep-source");
@@ -102,6 +110,7 @@ fn main() {
     let json_estree = generate_estree(source.unwrap())
         .expect("UTF-8 Error while reading json estree generated with babylon.");
 
+
     // Create a babylon json file
     if keep_ast {
         let estree_filename = format!("{}.json", filename);
@@ -111,9 +120,13 @@ fn main() {
     }
 
 
-    let root_node: RootNode = file_util::deserialize_json(json_estree.as_str());
-    let program_root = root_node.get_program_root();
+    let root_statement: RootStatement = file_util::deserialize_json(json_estree.as_str());
+    let program_root = root_statement.get_program_root();
     let program_root = program_root.expect("Error parsing Json AST");
+
+    if interpret {
+        let root_node = RootNode::build(program_root.clone());
+    }
 
     if asm {
         let mut writer = ASMWriter {
