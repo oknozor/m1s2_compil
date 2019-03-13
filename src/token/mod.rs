@@ -21,9 +21,8 @@ use std::fmt::Debug;
 use crate::token::token::Call;
 
 pub mod token;
-mod op_overload;
-mod to_token;
-mod token_visitor;
+pub mod op_overload;
+pub mod to_token;
 
 impl Operator {
     pub fn as_str(&self) -> &str {
@@ -35,6 +34,48 @@ impl Operator {
             AssignOp(o) => o.as_str(),
             LeftParenthesis => "(",
             RightParenthesis => ")",
+        }
+    }
+}
+
+pub trait Precedence {
+    fn get_precedence(a: &Self, b: &Self) -> bool;
+    fn is_left_associative(&self) -> bool;
+}
+
+impl Precedence for BinaryOperator {
+    fn get_precedence(a: &BinaryOperator, b: &BinaryOperator) -> bool {
+        match (a, b) {
+            (Mul, _) => true,
+            (Div, _) => true,
+            (Mod, _) => true,
+            _ => false,
+        }
+    }
+
+    fn is_left_associative(&self) -> bool {
+        match self {
+            Div => true,
+            Sub => true,
+            _ => false,
+        }
+    }
+}
+
+impl Precedence for Operator {
+    fn get_precedence(a: &Self, b: &Self) -> bool {
+        match (a, b) {
+            (UnaryOp(_), BinOp(_)) => true,
+            (BinOp(_), _) => true,
+            (AssignOp(_), _) => false,
+            _ => false,
+        }
+    }
+
+    fn is_left_associative(&self) -> bool {
+        match self {
+            BinOp(op) => op.is_left_associative(),
+            _=> unimplemented!()
         }
     }
 }
@@ -181,7 +222,6 @@ impl Display for Token {
             Token::Undefined => write!(f, "Undefined"),
             Token::IdendifierToken(id) => write!(f, "{}", id),
             Token::FunctionToken(Call { args, callee }) => write!(f, "{:?} ({:?})", callee, args),
-            Token::EndOfExp => write!(f, "EOE"),
         }
     }
 }
@@ -194,7 +234,6 @@ impl Debug for Token {
             Token::Undefined => write!(f, "{}", "Undefined"),
             Token::IdendifierToken(id) => write!(f, "{}", id),
             Token::FunctionToken(Call { args, callee }) => write!(f, "Call {:?} {:?}", callee, args),
-            Token::EndOfExp => write!(f, "EOE"),
         }
     }
 }

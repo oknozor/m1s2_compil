@@ -19,7 +19,7 @@ use crate::asm_compile::asm_writer::ASMWriter;
 use crate::asm_compile::Register;
 use crate::ast::statement::RootStatement;
 use crate::c_compile::c_writer::CWriter;
-use crate::token::token::RootNode;
+use crate::interpret::interpreter::Interpreter;
 
 pub mod ast;
 pub mod file_util;
@@ -125,10 +125,11 @@ fn main() {
     let program_root = program_root.expect("Error parsing Json AST");
 
     if interpret {
-        let root_node = RootNode::build(program_root.clone());
+        let root_node = Interpreter::build(program_root.clone());
+        root_node.main.iter().for_each(|x| println!("{:?}", x))
     }
 
-    if asm {
+    if asm  && !interpret {
         let mut writer = ASMWriter {
             out: &mut "".to_string(),
             reg: Register::RAX

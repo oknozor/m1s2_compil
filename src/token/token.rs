@@ -1,11 +1,5 @@
 use std::collections::HashMap;
 
-pub struct RootNode {
-    pub functions: HashMap<String, Vec<Node>>,
-    pub vars: HashMap<String, Vec<Token>>,
-    pub main: Vec<Token>,
-}
-
 pub struct Node {
     tokens: Vec<Token>
 }
@@ -17,7 +11,6 @@ pub enum Token {
     IdendifierToken(String),
     FunctionToken(Call),
     Undefined,
-    EndOfExp
 }
 
 #[derive(Clone)]
