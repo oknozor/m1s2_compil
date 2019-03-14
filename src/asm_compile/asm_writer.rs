@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use crate::token::token::Node;
 use crate::ast::statement::Statement::*;
 use crate::token::token::Token::OperatorToken;
+use crate::c_compile::RETURN;
 
 pub struct ASMWriter<'printer> {
     pub out: &'printer mut String,
@@ -48,9 +49,12 @@ impl<'printer> ASMWriter<'printer> {
 
         indexes_to_remove.iter().for_each(|i| { ast_mut.remove(*i); });
 
+        self.append(ASM_INIT);
         ast.iter().enumerate().for_each(|(i, statement)| {
             self.visit_statement(statement);
         });
+        self.append(TAB);
+        self.append(ASM_RET);
     }
 
     pub fn append(&mut self, word: &str) {
@@ -66,6 +70,10 @@ impl<'printer> ASMWriter<'printer> {
     }
 
     pub fn write_asm_op(&mut self, str_op: &str) {
+        self.append(&format!("\t{}\t{}", ASM_POP, RBX));
+        self.append(NEW_LINE);
+        self.append(&format!("\t{}\t{}", ASM_POP, RAX));
+        self.append(NEW_LINE);
         self.append(TAB);
         match str_op {
             "+" => {
@@ -80,38 +88,38 @@ impl<'printer> ASMWriter<'printer> {
                 self.append(ASM_DIV);
                 self.append("cqto");
                 self.append(&format!("{} %{}", TAB, RBX));
-                self.append(NEW_LINE)
             }
             "*" => {
                 self.append(ASM_MUL);
                 self.append(&format!("{} %{}", TAB, RBX));
-                self.append(NEW_LINE)
             }
             _ => println!("{} not found", str_op)
         }
+        self.append(NEW_LINE);
+        self.append(&format!("\t{}\t%{}\n", ASM_POP, RAX));
     }
 
     pub fn append_lit(&mut self, lit: &str) {
-        self.change_register();
-        self.append(&format!("\t{}\t${}, %{}", ASM_MOVE, lit, self.reg.to_string()))
+        self.append(&format!("\t{}\t${}", ASM_PUSH, lit))
     }
 
-    pub fn postfix_to_asm(&mut self, postfix_expression: &mut Vec<Token> ) {
+    pub fn postfix_to_asm(&mut self, postfix_expression: &mut Vec<Token>) {
         let mut postfix_expression = postfix_expression.clone();
         postfix_expression.reverse();
 
-
+        let mut lit_count = 0;
         while !postfix_expression.is_empty() {
-            if let Some(LiteralToken(lit)) = postfix_expression.pop() {
+            if let Some(LiteralToken(lit)) = postfix_expression.last() {
                 self.append_lit(&lit.to_string());
-                self.append(NEW_LINE);
+                postfix_expression.pop();
+                lit_count = lit_count + 1;
+            }
+            if let Some(OperatorToken(op)) = postfix_expression.last() {
+                self.write_asm_op(op.as_str());
+                postfix_expression.pop();
             };
 
-            if let Some(OperatorToken(op)) = postfix_expression.pop() {
-                self.write_asm_op(op.as_str());
-                self.append(NEW_LINE);
-            };
+            self.append(NEW_LINE);
         };
     }
-
 }

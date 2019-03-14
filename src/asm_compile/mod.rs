@@ -12,6 +12,8 @@ pub const ASM_SUB: &'static str = "subq";
 pub const ASM_MUL: &'static str = "imul";
 pub const ASM_DIV: &'static str = "idiv";
 pub const ASM_MOVE: &'static str = "movq";
+pub const ASM_PUSH: &'static str = "pushq";
+pub const ASM_POP: &'static str = "popq";
 pub const ASM_RET: &'static str = "ret";
 
 

@@ -65,11 +65,6 @@ impl<'pr> Visitor for ASMWriter<'pr> {
 
     fn visit_expression(&mut self, exp: &Expression) {
         match exp {
-            NumericLiteral(ref n) => {}
-            StringLiteral(ref s) => {
-                self.change_register();
-                self.append(&format!("\t{}\t{}, ${}", ASM_MOVE, s.to_string(), self.reg.to_string()))
-            }
             UpdateExpression(ref u) => self.visit_update_expression(u),
             BinaryExpression(ref b) => self.visit_binary_expression(b),
             UnaryExpression(ref u) => self.visit_unary_expression(u),
@@ -86,9 +81,12 @@ impl<'pr> Visitor for ASMWriter<'pr> {
     }
 
     fn visit_binary_expression(&mut self, b: &BinaryExp) {
-        let mut tokens = &b.to_token();
+        let tokens = &b.to_token();
         let mut postfix_expression = postfix(&mut tokens.clone());
         self.postfix_to_asm(&mut postfix_expression);
+        self.append(TAB);
+        self.append(NEW_LINE);
+
     }
 
     fn visit_assign(&mut self, a: &AssignmentExp) { unimplemented!(); }
