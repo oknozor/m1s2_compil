@@ -1,4 +1,4 @@
 #!/bin/bash
 cargo build
-cp target/debug/rjsc ../sandbox
+cp target/debug/rjsc sandbox/
 cd sandbox && make all

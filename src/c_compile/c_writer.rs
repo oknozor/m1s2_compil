@@ -2,12 +2,11 @@ use std::fmt::Display;
 
 use crate::ast::expression::*;
 use crate::ast::expression::Expression::*;
-use crate::ast::statement::*;
 use crate::ast::statement::Statement::*;
 use crate::ast::statement::Statement;
-use crate::c_compile::c_write_utils::*;
-use crate::visitor::Visitor;
 use crate::c_compile::*;
+use crate::visitor::Visitor;
+use crate::writer::*;
 
 pub struct CWriter<'printer> {
     pub out: &'printer mut String,

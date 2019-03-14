@@ -8,7 +8,7 @@ pub trait Visitor {
         match s {
             BlockStatement(b) => self.visit_block_statement(b),
             ExpressionStatement(e) => self.visit_expression_statement(e),
-            WhileStatement(v) => self.visit_while_statment(v),
+            WhileStatement(v) => self.visit_while_statement(v),
             IfStatement(i) => self.visit_if_statement(i),
             SwitchStatement(s) => self.visit_switch_statement(s),
             ForStatement(f) => self.visit_for_statement(f),
@@ -19,7 +19,6 @@ pub trait Visitor {
             _ => (),
         };
     }
-    fn visit_while_statment(&mut self, w: &WhileStmt);
     fn visit_block_statement(&mut self, s: &BlockStmt);
     fn visit_variable_declarator(&mut self, v: &Variable);
     fn visit_while_statement(&mut self, w: &WhileStmt);

@@ -10,6 +10,7 @@ use std::cell::RefCell;
 use rand::Rng;
 use rand::distributions::Alphanumeric;
 use rand::thread_rng;
+use crate::writer::*;
 
 impl<'pr> Visitor for  CWriter<'pr> {
 
@@ -19,7 +20,7 @@ impl<'pr> Visitor for  CWriter<'pr> {
             BlockStatement(block) => self.visit_block_statement(block),
             VariableDeclaration(var) => self.visit_variable_declaration(var),
             ExpressionStatement(exp) => self.visit_expression_statement(exp),
-            WhileStatement(wh) => self.visit_while_statment(wh),
+            WhileStatement(wh) => self.visit_while_statement(wh),
             IfStatement(if_stmt) => self.visit_if_statement(if_stmt),
             SwitchStatement(sw_stmt) => self.visit_switch_statement(sw_stmt),
             ForStatement(for_stmt) => self.visit_for_statement(for_stmt),
@@ -31,16 +32,6 @@ impl<'pr> Visitor for  CWriter<'pr> {
         };
     }
 
-
-    fn visit_while_statment(&mut self, w: &WhileStmt) {
-        self.append(WHILE);
-        self.append(PARENTHESIS_LEFT);
-        self.visit_expression(&w.test);
-        self.append(PARENTHESIS_RIGHT);
-        self.append(BRACKET_LEFT);
-        self.visit_statement(&w.body);
-        self.append(BRACKET_RIGHT);
-    }
 
     fn visit_block_statement(&mut self, s: &BlockStmt) {
         s.body.iter().for_each(|statement| self.visit_statement(statement))
@@ -68,7 +59,7 @@ impl<'pr> Visitor for  CWriter<'pr> {
         self.append(PARENTHESIS_LEFT);
         self.visit_expression(&w.test);
         self.append(PARENTHESIS_RIGHT);
-        self.append(BRACKET_RIGHT);
+        self.append(BRACKET_LEFT);
         self.visit_statement(&w.body);
         self.append(BRACKET_RIGHT);
     }
