@@ -13,7 +13,7 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn build(ast: Vec<Box<Statement>>) -> Interpreter {
+    pub fn run(ast: Vec<Box<Statement>>) -> Interpreter {
         let mut ast_mut = ast.clone();
         let mut token_root = Interpreter {
             functions: HashMap::new(),
