@@ -7,66 +7,65 @@ use crate::asm_compile::asm_writer::ASMWriter;
 use crate::writer::*;
 use crate::asm_compile::Register;
 use crate::asm_compile::*;
+use crate::token::to_token::ToToken;
+use crate::token::to_token::postfix;
 
 impl<'pr> Visitor for ASMWriter<'pr> {
     fn visit_block_statement(&mut self, s: &BlockStmt) {
-        self.append("block");
+        unimplemented!();
     }
 
     fn visit_variable_declarator(&mut self, v: &Variable) {
-        self.append("variable_dco");
+        unimplemented!();
     }
 
     fn visit_while_statement(&mut self, w: &WhileStmt) {
-        self.append("variable_dco");
+        unimplemented!();
     }
 
     fn visit_variable_declaration(&mut self, v: &VariableDec) {
-        self.append("variable_de");
+        unimplemented!();
     }
 
     fn visit_if_statement(&mut self, i: &IfStmt) {
-        self.append("if");
+        unimplemented!();
     }
 
     fn visit_switch_statement(&mut self, s: &SwitchStmt) {
-        self.append("switch");
+        unimplemented!();
     }
 
     fn visit_case(&mut self, case: &CaseStmt) {
-        self.append("case");
+        unimplemented!();
     }
 
     fn visit_for_statement(&mut self, f: &ForStmt) {
-        self.append("for");
+        unimplemented!();
     }
 
     fn visit_break_statement(&mut self, f: &BreakStmt) {
-        self.append("break");
+        unimplemented!();
     }
 
     fn visit_return_statement(&mut self, r: &ReturnStmt) {
-        self.append("ret");
+        unimplemented!();
     }
 
     fn visit_continue_statement(&mut self, c: &ContinueStmt) {
-        self.append("continue");
+        unimplemented!();
     }
 
     fn visit_function_declaration(&mut self, f: &FunctionDec) {
-        self.append("func_dec");
+        unimplemented!();
     }
 
     fn visit_option_expression(&mut self, exp: &Option<Box<Expression>>) {
-        self.append("opt_exp");
+        unimplemented!();
     }
 
     fn visit_expression(&mut self, exp: &Expression) {
         match exp {
-            NumericLiteral(ref n) => {
-                self.change_register();
-                self.append(&format!("\t{}\t${}, %{}", ASM_MOVE, n.to_string(), self.reg.to_string()))
-            }
+            NumericLiteral(ref n) => {}
             StringLiteral(ref s) => {
                 self.change_register();
                 self.append(&format!("\t{}\t{}, ${}", ASM_MOVE, s.to_string(), self.reg.to_string()))
@@ -87,45 +86,38 @@ impl<'pr> Visitor for ASMWriter<'pr> {
     }
 
     fn visit_binary_expression(&mut self, b: &BinaryExp) {
-        self.visit_expression(&b.right);
-        self.append(NEW_LINE);
-        self.visit_expression(&b.left);
-        self.append(NEW_LINE);
-        self.write_asm_op(&b.operator);
-        self.append(NEW_LINE);
-        self.append("#bin exp end\n")
+        let mut tokens = &b.to_token();
+        let mut postfix_expression = postfix(&mut tokens.clone());
+        self.postfix_to_asm(&mut postfix_expression);
     }
 
-    fn visit_assign(&mut self, a: &AssignmentExp) {
-        self.append("assign_exp");
-        self.append(NEW_LINE);
-    }
+    fn visit_assign(&mut self, a: &AssignmentExp) { unimplemented!(); }
 
     fn visit_unary_expression(&mut self, u: &UnaryExp) {
-        self.append("unary_exp");
+        unimplemented!();
     }
 
     fn visit_update_expression(&mut self, u: &UpdateExp) {
-        self.append("update_exp");
+        unimplemented!();
     }
 
     fn visit_member_expression(&mut self, m: &MemberExp) {
-        self.append("member_exp");
+        unimplemented!();
     }
 
     fn visit_logical_expression(&mut self, l: &LogicalExp) {
-        self.append("log exp");
+        unimplemented!();
     }
 
     fn visit_call_expression(&mut self, e: &CallExp) {
-        self.append("call_exp");
+        unimplemented!();
     }
 
     fn visit_object_expression(&mut self, o: &ObjectExp, id: String) {
-        self.append("obj exp");
+        unimplemented!();
     }
 
     fn visit_property_expression(&mut self, id: &str, p: &Property) {
-        self.append("prop exp");
+        unimplemented!();
     }
 }

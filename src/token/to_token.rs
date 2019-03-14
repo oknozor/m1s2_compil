@@ -9,11 +9,12 @@ use crate::token::token::Operator::*;
 use crate::token::token::Token::*;
 use crate::visitor::Visitor;
 use crate::token::Precedence;
+use std::path::Component::Prefix;
 
 #[derive(Debug)]
 pub struct Stack {
     pub out_queue: Vec<Token>,
-    pub op_queue: Vec<Token>,
+    pub op_queue: Vec<Operator>,
 }
 
 impl Stack {
@@ -25,7 +26,6 @@ impl Stack {
     }
 }
 
-// TODO : return slice
 pub trait ToToken {
     fn to_token(&self) -> Vec<Token>;
 }
@@ -52,10 +52,28 @@ impl ToToken for Box<Expression> {
 impl ToToken for BinaryExp {
     fn to_token(&self) -> Vec<Token> {
         let mut token_stream = vec![];
-        /*if let Some(extra) = &self.extra*/
+        if let Some(extra) = &self.extra {
+            token_stream.push(OperatorToken(RightParenthesis));
+        };
         let op: BinaryOperator = BinaryOperator::from(self.operator.as_str());
-        let left_postfix = postfix(&mut self.left.to_token());
-        let left_tokens = postfix(&mut self.right.to_token());
+        match &self.right {
+            box NumericLiteral(num) => token_stream.push(Token::LiteralToken(Literal::NumericLiteral(num.value))),
+            box StringLiteral(string) => token_stream.push(Token::LiteralToken(Literal::StringLiteral(string.value.clone()))),
+            box BinaryExpression(bin) => token_stream.append(&mut bin.to_token()),
+            _ => unimplemented!()
+        };
+
+        token_stream.push(OperatorToken(Operator::BinOp(op)));
+        match &self.left {
+            box NumericLiteral(num) => token_stream.push(Token::LiteralToken(Literal::NumericLiteral(num.value))),
+            box StringLiteral(string) => token_stream.push(Token::LiteralToken(Literal::StringLiteral(string.value.clone()))),
+            box BinaryExpression(bin) => token_stream.append(&mut bin.to_token()),
+            _ => unimplemented!()
+
+        };
+        if let Some(extra) = &self.extra {
+            token_stream.push(OperatorToken(LeftParenthesis));
+        };
         token_stream
     }
 }
@@ -171,32 +189,26 @@ pub fn postfix(tokens: &mut Vec<Token>) -> Vec<Token> {
     let mut stack = Stack::new();
 
     while let Some(token_in) = tokens.pop() {
-        println!("{:?}", stack);
-        let op_on_stack = stack.op_queue.last();
         match &token_in {
             LiteralToken(_) => postfix_expression.push(token_in.clone()),
-            FunctionToken(_) => stack.op_queue.push(token_in.clone()),
-            OperatorToken(LeftParenthesis) => stack.op_queue.push(OperatorToken(LeftParenthesis)),
+            FunctionToken(_) => unimplemented!(),
+            OperatorToken(LeftParenthesis) => stack.op_queue.push(LeftParenthesis),
             OperatorToken(RightParenthesis) => {
-                while !is_left_parenthesis(&token_in) {
-                    let operator = stack.op_queue.pop().expect("Missing left parenthesis");
-                    if !is_left_parenthesis(&operator) {
-                        postfix_expression.push(operator);
-                    };
+                while stack.op_queue.last().expect("missing left parenthesis") != &LeftParenthesis {
+                    postfix_expression.push(Token::from(stack.op_queue.pop().unwrap()));
+                };
+                if let Some(LeftParenthesis) = stack.op_queue.last() {
+                    stack.op_queue.pop();
                 };
             }
             OperatorToken(op_in) => {
-                while let Some(OperatorToken(operator_from_stack)) = stack.op_queue.last() {
-                    let operator_from_stack = operator_from_stack.clone();
-                    if (top_operator_is_function(&OperatorToken(operator_from_stack)) ||
-                        operator_on_stack_as_greater_precedence(&OperatorToken(operator_from_stack), &OperatorToken(op_in.clone())) ||
-                        operator_on_stack_as_equal_precedence_and_is_left_associative(&OperatorToken(operator_from_stack), &OperatorToken(op_in.clone()))) &&
-                        top_operator_is_left_parenthesis(&OperatorToken(operator_from_stack)) {
-                        let token = stack.op_queue.pop().unwrap();
-                        postfix_expression.push(token);
-                    };
+                while stack.op_queue.last().is_some() &&
+                    Operator::get_precedence(stack.op_queue.last().unwrap(), op_in) &&
+                    !is_left_parenthesis(stack.op_queue.last().unwrap()) {
+                    let op = OperatorToken(stack.op_queue.pop().unwrap());
+                    postfix_expression.push(op);
                 };
-                stack.op_queue.push(OperatorToken(*op_in));
+                stack.op_queue.push(*op_in);
             }
             IdendifierToken(_) => unimplemented!(),
             Undefined => unimplemented!(),
@@ -205,13 +217,13 @@ pub fn postfix(tokens: &mut Vec<Token>) -> Vec<Token> {
 
     while !stack.op_queue.is_empty() {
         let leftover = stack.op_queue.pop();
-        postfix_expression.push(leftover.unwrap());
+        postfix_expression.push(Token::from(leftover.unwrap()));
     };
     postfix_expression
 }
 
-fn is_left_parenthesis(token: &Token) -> bool {
-    if let OperatorToken(LeftParenthesis) = token {
+fn is_left_parenthesis(operator: &Operator) -> bool {
+    if let LeftParenthesis = operator {
         true
     } else {
         false
@@ -302,15 +314,21 @@ mod tests {
     #[test]
     fn should_postfix_parenthesized_expression() {
         let token_in: &mut Vec<Token> = &mut Vec::new();
-        token_in.push(LiteralToken(NumericLiteral(2.0)));
-        token_in.push(OperatorToken(Operator::BinOp(Mul)));
-        token_in.push(OperatorToken(LeftParenthesis));
+        // 2 * ( 1 + 1 )
+        token_in.push(OperatorToken(RightParenthesis));
         token_in.push(LiteralToken(NumericLiteral(1.0)));
         token_in.push(OperatorToken(Operator::BinOp(Add)));
         token_in.push(LiteralToken(NumericLiteral(1.0)));
-        token_in.push(OperatorToken(RightParenthesis));
+        token_in.push(OperatorToken(LeftParenthesis));
+        token_in.push(OperatorToken(Operator::BinOp(Mul)));
+        token_in.push(LiteralToken(NumericLiteral(2.0)));
 
         let mut expected = vec![];
+        expected.push(LiteralToken(NumericLiteral(2.0)));
+        expected.push(LiteralToken(NumericLiteral(1.0)));
+        expected.push(LiteralToken(NumericLiteral(1.0)));
+        expected.push(OperatorToken(Operator::BinOp(Add)));
+        expected.push(OperatorToken(Operator::BinOp(Mul)));
         let token_postfix = postfix(token_in);
 
         assert_eq!(token_postfix, expected);

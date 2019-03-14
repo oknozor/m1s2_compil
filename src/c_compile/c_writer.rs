@@ -4,7 +4,6 @@ use crate::ast::expression::*;
 use crate::ast::expression::Expression::*;
 use crate::ast::statement::Statement::*;
 use crate::ast::statement::Statement;
-use crate::c_compile::c_write_utils::*;
 use crate::c_compile::*;
 use crate::visitor::Visitor;
 use crate::writer::*;

@@ -7,4 +7,5 @@
 **/rjsc
 **/out*
 c_datalib/test
+sandbox
 Cargo.lock

@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use crate::token::token::Operator::*;
+use crate::token::token::BinaryOperator::*;
 
 pub struct Node {
     tokens: Vec<Token>
@@ -84,4 +86,21 @@ pub enum AssignmentOperator {
 pub struct Call {
     pub args: Vec<Token>,
     pub callee: String,
+}
+
+impl Operator {
+    pub fn solve(&self, a: &Literal, b: &Literal) -> Literal {
+        match &self {
+            BinOp(op) => {
+                match op {
+                    Add => a.clone() + b.clone(),
+                    Sub => a.clone() - b.clone(),
+                    Mul => a.clone() * b.clone(),
+                    Div => a.clone() / b.clone(),
+                    _ => unimplemented!()
+                }
+            }
+            _=> unimplemented!(),
+        }
+    }
 }

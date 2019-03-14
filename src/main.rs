@@ -20,6 +20,7 @@ use crate::asm_compile::Register;
 use crate::ast::statement::RootStatement;
 use crate::c_compile::c_writer::CWriter;
 use crate::interpret::interpreter::Interpreter;
+use std::collections::HashMap;
 
 pub mod ast;
 pub mod file_util;
@@ -126,15 +127,18 @@ fn main() {
 
     if interpret {
         let root_node = Interpreter::build(program_root.clone());
-        root_node.main.iter().for_each(|x| println!("{:?}", x))
     }
 
     if asm  && !interpret {
         let mut writer = ASMWriter {
-            out: &mut "".to_string(),
-            reg: Register::RAX
+            out: &mut String::new(),
+            reg: Register::RAX,
+            functions: HashMap::new(),
+            vars: HashMap::new(),
+            main: vec![],
         };
-        writer.visit_program_root(program_root.clone());
+
+        writer.build(program_root);
         write_asm_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
 
     } else {

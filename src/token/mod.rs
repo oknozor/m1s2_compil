@@ -38,6 +38,18 @@ impl Operator {
     }
 }
 
+impl Literal {
+    pub fn to_string(self) -> String {
+        match self {
+            NullLiteral => "null".to_string(),
+            Infinity => "Infinity".to_string(),
+            NumericLiteral(n) => format!("{}", n),
+            StringLiteral(s) => s,
+            BooleanLiteral(b) => if b { "1".to_string() } else { "0".to_string() }
+        }
+    }
+}
+
 pub trait Precedence {
     fn get_precedence(a: &Self, b: &Self) -> bool;
     fn is_left_associative(&self) -> bool;
@@ -66,6 +78,7 @@ impl Precedence for Operator {
     fn get_precedence(a: &Self, b: &Self) -> bool {
         match (a, b) {
             (UnaryOp(_), BinOp(_)) => true,
+            (BinOp(a), BinOp(b)) => BinaryOperator::get_precedence(a, b),
             (BinOp(_), _) => true,
             (AssignOp(_), _) => false,
             _ => false,
@@ -75,7 +88,7 @@ impl Precedence for Operator {
     fn is_left_associative(&self) -> bool {
         match self {
             BinOp(op) => op.is_left_associative(),
-            _=> unimplemented!()
+            _ => false
         }
     }
 }
@@ -315,3 +328,30 @@ impl From<Operator> for Token {
         OperatorToken(operator)
     }
 }
+
+impl Token {
+    pub fn as_operator(&self) -> Result<Operator, Error> {
+        match self {
+            OperatorToken(op) => Ok(op.clone()),
+            _ => panic!("not an operator")
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::token::token::Operator;
+    use crate::token::token::BinaryOperator::*;
+    use crate::token::Precedence;
+
+    #[test]
+    fn mul_shall_have_precedence() {
+        let mul = Operator::BinOp(Mul);
+        let add = Operator::BinOp(Add);
+
+        let as_precedence = Precedence::get_precedence(&mul, &add);
+
+        assert_eq!(true, as_precedence)
+    }
+}
+
