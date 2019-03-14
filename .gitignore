@@ -6,6 +6,6 @@
 **/*.a
 **/rjsc
 **/out*
-c_datalib/test
+c_datalib/tes
 sandbox
 Cargo.lock

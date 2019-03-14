@@ -126,7 +126,7 @@ fn main() {
     let program_root = program_root.expect("Error parsing Json AST");
 
     if interpret {
-        let root_node = Interpreter::build(program_root.clone());
+        Interpreter::run(program_root.clone());
     }
 
     if asm  && !interpret {
@@ -141,7 +141,7 @@ fn main() {
         writer.build(program_root);
         write_asm_to_file(filename, writer).expect(format!("Error writing {}", filename).as_str());
 
-    } else {
+    } else if !interpret {
         let mut writer = CWriter {
             out: &mut "".to_string(),
         };
